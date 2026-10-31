@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/app/contexts/auth.context";
@@ -9,8 +9,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "POS Multi-Store Admin",
-  description: "Sistema de administración POS para múltiples tiendas",
+  title: "SVAdmin",
+  description: "Panel de administración de SmartVenta (tenants y pagos).",
+  applicationName: "SVAdmin",
+  appleWebApp: {
+    capable: true,
+    title: "SVAdmin",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0B1B4D",
 };
 
 export default function RootLayout({
