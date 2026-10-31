@@ -220,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
 
-        // Tras el login, traer la lista de negocios (tenants).
+        // Tras el login, traer la lista de negocios.
         fetchTenants(response.token);
       } catch (error) {
         const message =

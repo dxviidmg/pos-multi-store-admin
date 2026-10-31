@@ -11,7 +11,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!state.loading && state.isAuthenticated) {
-      router.push("/tenants");
+      router.push("/negocios");
     }
   }, [state.isAuthenticated, state.loading, router]);
 

@@ -3,7 +3,7 @@
 ## Ejemplo 1: Crear una nueva página protegida
 
 ```tsx
-// app/tenants/page.tsx
+// app/negocios/page.tsx
 "use client";
 
 import { useAuth } from "@/app/contexts/auth.context";

@@ -137,8 +137,8 @@ curl -X POST http://localhost:8000/api/api-token-auth/ \
 
 1. **Crear página de tenants**:
    ```bash
-   mkdir -p app/tenants
-   touch app/tenants/page.tsx
+   mkdir -p app/negocios
+   touch app/negocios/page.tsx
    ```
 
 2. **Agregar rutas protegidas**:

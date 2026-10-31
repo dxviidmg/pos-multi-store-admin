@@ -218,7 +218,7 @@ npm run dev
 
 ## 📝 Próximos Pasos
 
-1. **Crear módulo de tenants** (`app/tenants/`)
+1. **Crear módulo de tenants** (`app/negocios/`)
    - Listar tenants
    - Crear tenant
    - Editar tenant

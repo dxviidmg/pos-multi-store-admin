@@ -10,7 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/auth.context";
 
 const NAV_ITEMS = [
-  { label: "Negocios", href: "/tenants" },
+  { label: "Negocios", href: "/negocios" },
   { label: "Inversión", href: "/inversion" },
 ];
 

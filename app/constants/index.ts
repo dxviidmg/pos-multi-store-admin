@@ -20,7 +20,7 @@ export const STORAGE_KEYS = {
 export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
-  DASHBOARD: "/tenants",
+  DASHBOARD: "/negocios",
   NO_PERMISSION: "/no-permission",
   UNAUTHORIZED: "/unauthorized",
 };
