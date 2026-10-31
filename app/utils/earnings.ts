@@ -8,6 +8,7 @@ import {
   EarningsSummary,
   SalaryScenario,
 } from "@/app/domain/earnings.types";
+import { Tenant } from "@/app/domain/tenant.types";
 
 export const SALARY_SCENARIOS: SalaryScenario[] = [10000, 15000, 25000, 30000].map(
   (monthly) => ({ monthly, hourly: monthly / 30 / 8 })
@@ -16,6 +17,57 @@ export const SALARY_SCENARIOS: SalaryScenario[] = [10000, 15000, 25000, 30000].m
 /** Total de horas de desarrollo sumando todos los repos del JSON. */
 export function getTotalDevHours(): number {
   return costsData.development.repos.reduce((sum, r) => sum + r.hours, 0);
+}
+
+/**
+ * Costo mensual recurrente de infraestructura (ej. Render/OnRender).
+ * Suma el `unitCost` de todos los cargos recurrentes del JSON, ya que son
+ * cargos que se repiten cada mes.
+ */
+export function getMonthlyRecurringCost(): number {
+  return costsData.recurring.reduce((sum, r) => sum + r.unitCost, 0);
+}
+
+/**
+ * Ganancia neta mensual = ingreso mensual recurrente (MRR) menos el costo
+ * mensual recurrente de infraestructura (Render).
+ */
+export interface MonthlyProfit {
+  mrr: number;
+  recurringCost: number;
+  net: number;
+}
+
+type BillableTenant = Pick<
+  Tenant,
+  "has_access" | "is_sandbox" | "is_paid" | "monthly_amount"
+>;
+
+/** MRR: mensualidades de los negocios reales con acceso vigente. */
+export function computeMrr(tenants: BillableTenant[]): number {
+  return tenants.reduce(
+    (sum, t) => sum + (t.has_access && !t.is_sandbox ? t.monthly_amount : 0),
+    0
+  );
+}
+
+/** Cobrado este mes: mensualidades de todos los negocios con pago vigente. */
+export function computePaidThisMonth(tenants: BillableTenant[]): {
+  amount: number;
+  paidCount: number;
+  totalCount: number;
+} {
+  const paid = tenants.filter((t) => t.is_paid);
+  return {
+    amount: paid.reduce((sum, t) => sum + t.monthly_amount, 0),
+    paidCount: paid.length,
+    totalCount: tenants.length,
+  };
+}
+
+export function computeMonthlyProfit(mrr: number): MonthlyProfit {
+  const recurringCost = getMonthlyRecurringCost();
+  return { mrr, recurringCost, net: mrr - recurringCost };
 }
 
 /**
