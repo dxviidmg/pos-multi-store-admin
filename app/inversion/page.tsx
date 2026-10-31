@@ -286,16 +286,16 @@ function InversionContent() {
                 <table className="min-w-full">
                   <thead className="bg-brand">
                     <tr>
-                      <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                      <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                         Concepto
                       </th>
-                      <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                      <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                         Tipo
                       </th>
-                      <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                      <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                         Detalle
                       </th>
-                      <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
+                      <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                         Importe
                       </th>
                     </tr>

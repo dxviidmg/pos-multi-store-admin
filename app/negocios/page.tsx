@@ -158,7 +158,7 @@ function TenantsContent() {
           {ready && (
 <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
-                  <label htmlFor="sandbox-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+                  <label htmlFor="sandbox-filter" className="mb-1 block text-xs font-semibold text-muted">
                     Entorno
                   </label>
                   <select
@@ -175,7 +175,7 @@ function TenantsContent() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="status-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+                  <label htmlFor="status-filter" className="mb-1 block text-xs font-semibold text-muted">
                     Estado
                   </label>
                   <select
@@ -192,7 +192,7 @@ function TenantsContent() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="domiciliada-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+                  <label htmlFor="domiciliada-filter" className="mb-1 block text-xs font-semibold text-muted">
                     Domiciliada
                   </label>
                   <select
@@ -233,22 +233,22 @@ function TenantsContent() {
               <table className="min-w-full">
                 <thead className="bg-brand">
                   <tr>
-                    <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
+                    <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                       Nombre
                     </th>
-                    <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
+                    <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                       Entorno
                     </th>
-                    <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
+                    <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                       Domiciliada
                     </th>
-                    <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold text-white/80 uppercase tracking-wider">
+                    <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                       Pago mensual
                     </th>
-                    <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
+                    <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                       Próximo pago
                     </th>
-                    <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold text-white/80 uppercase tracking-wider">
+                    <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                       Acciones
                     </th>
                   </tr>

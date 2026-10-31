@@ -234,29 +234,29 @@ function PagosContent() {
                   <table className="min-w-full">
                     <thead className="bg-brand">
                       <tr>
-                        <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Cliente
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Recibido
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Esperado
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           No cobrado
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Pagos
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Primer pago
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Último pago
                         </th>
-                        <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
-                          <span className="sr-only">Detalle</span>
+                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
+                          Acciones
                         </th>
                       </tr>
                     </thead>
