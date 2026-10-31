@@ -38,10 +38,10 @@ export function ProtectedRoute({
 
   if (state.loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div role="status" className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <p className="mt-4 text-muted">Cargando...</p>
         </div>
       </div>
     );
