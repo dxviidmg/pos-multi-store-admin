@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   VALIDATE_TOKEN: "/api/auth/verify/",
   LOGOUT: "/api/auth/logout/",
   TENANTS: "/api/tenants/",
+  TENANTS_CREATE: "/api/tenants/create/",
   PAYMENTS_TOTAL: "/api/payments-total/",
   PAYMENTS_BY_TENANT: "/api/payments-by-tenant/",
 };

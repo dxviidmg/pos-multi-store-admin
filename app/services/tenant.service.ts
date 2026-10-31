@@ -4,7 +4,7 @@
 
 import { Tenant, TenantError } from "@/app/domain/tenant.types";
 import { API_ENDPOINTS, ERROR_MESSAGES } from "@/app/constants";
-import { apiGet, ApiErrorFactory } from "@/app/services/http";
+import { apiGet, apiPost, ApiErrorFactory } from "@/app/services/http";
 
 /** Errores de dominio para las llamadas que requieren superusuario. */
 export const tenantApiErrors: ApiErrorFactory = {
@@ -16,7 +16,26 @@ export const tenantApiErrors: ApiErrorFactory = {
     new TenantError("NETWORK_ERROR", ERROR_MESSAGES.NETWORK_ERROR),
   unknown: () =>
     new TenantError("UNKNOWN_ERROR", ERROR_MESSAGES.TENANTS_FETCH_FAILED),
+  withMessage: (message, status) =>
+    new TenantError("REQUEST_FAILED", message, status),
 };
+
+/** Datos para crear un negocio manualmente desde el admin. */
+export interface CreateTenantInput {
+  name: string;
+  short_name: string;
+  is_sandbox?: boolean;
+  plan_id?: number | null;
+}
+
+/** Respuesta del alta manual de un negocio. */
+export interface CreateTenantResult {
+  id: number;
+  name: string;
+  short_name: string;
+  is_sandbox: boolean;
+  owner_username: string;
+}
 
 export class TenantService {
   /**
@@ -25,5 +44,20 @@ export class TenantService {
    */
   static getTenants(token: string): Promise<Tenant[]> {
     return apiGet<Tenant[]>(API_ENDPOINTS.TENANTS, token, tenantApiErrors);
+  }
+
+  /**
+   * Alta manual de un negocio (sin Mercado Pago). Requiere superusuario.
+   */
+  static createTenant(
+    token: string,
+    input: CreateTenantInput
+  ): Promise<CreateTenantResult> {
+    return apiPost<CreateTenantResult>(
+      API_ENDPOINTS.TENANTS_CREATE,
+      token,
+      input,
+      tenantApiErrors
+    );
   }
 }

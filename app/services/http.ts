@@ -18,6 +18,8 @@ export interface ApiErrorFactory {
   network: () => Error;
   /** Cualquier otro error inesperado. */
   unknown: () => Error;
+  /** Error con un mensaje específico devuelto por el backend. */
+  withMessage: (message: string, status?: number) => Error;
 }
 
 /**
@@ -51,6 +53,53 @@ export async function apiGet<T>(
     return (await response.json()) as T;
   } catch {
     // Cuerpo no es JSON válido o se interrumpió la lectura.
+    throw errors.unknown();
+  }
+}
+
+/**
+ * POST autenticado con cuerpo JSON que devuelve JSON tipado `T`.
+ * En respuestas no-OK intenta extraer el campo `error`/`detail` del cuerpo
+ * para un mensaje más preciso; si no, usa la fábrica de errores.
+ */
+export async function apiPost<T>(
+  path: string,
+  token: string,
+  body: unknown,
+  errors: ApiErrorFactory
+): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    if (error instanceof TypeError) throw errors.network();
+    throw errors.unknown();
+  }
+
+  if (response.status === 403) throw errors.noPermission();
+
+  if (!response.ok) {
+    // Intentar leer el mensaje de error del backend ({ error } o { detail }).
+    const data = await response.json().catch(() => null);
+    const message =
+      data && (data.error || data.detail)
+        ? (data.error as string) || (data.detail as string)
+        : null;
+    throw message
+      ? errors.withMessage(message, response.status)
+      : errors.fetchFailed(response.status);
+  }
+
+  try {
+    return (await response.json()) as T;
+  } catch {
     throw errors.unknown();
   }
 }
