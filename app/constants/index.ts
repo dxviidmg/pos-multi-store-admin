@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   LOGOUT: "/api/auth/logout/",
   TENANTS: "/api/tenants/",
   PAYMENTS_TOTAL: "/api/payments-total/",
+  PAYMENTS_BY_TENANT: "/api/payments-by-tenant/",
 };
 
 export const STORAGE_KEYS = {
