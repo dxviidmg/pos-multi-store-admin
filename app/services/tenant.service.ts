@@ -2,7 +2,7 @@
  * Service Layer - API de tenants (negocios)
  */
 
-import { Tenant, TenantError } from "@/app/domain/tenant.types";
+import { Tenant, TenantError, PlanStats } from "@/app/domain/tenant.types";
 import { API_ENDPOINTS, ERROR_MESSAGES } from "@/app/constants";
 import { apiGet, apiPost, ApiErrorFactory } from "@/app/services/http";
 
@@ -73,6 +73,18 @@ export class TenantService {
   /** Lista los planes ofrecibles a un negocio. Requiere superusuario. */
   static getPlans(token: string): Promise<Plan[]> {
     return apiGet<Plan[]>(API_ENDPOINTS.ADMIN_PLANS, token, tenantApiErrors);
+  }
+
+  /**
+   * Lista todos los planes con estadísticas (conteo de tenants y tipo de
+   * facturación) para la vista /planes. Requiere superusuario.
+   */
+  static getPlansWithStats(token: string): Promise<PlanStats[]> {
+    return apiGet<PlanStats[]>(
+      API_ENDPOINTS.ADMIN_PLANS_STATS,
+      token,
+      tenantApiErrors
+    );
   }
 
   /** Verifica si un short_name ya está en uso. Requiere superusuario. */

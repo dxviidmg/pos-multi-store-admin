@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   TENANTS: "/api/tenants/",
   TENANTS_CREATE: "/api/tenants/create/",
   ADMIN_PLANS: "/api/admin-plans/",
+  ADMIN_PLANS_STATS: "/api/admin-plans-stats/",
   ADMIN_TENANT_EXISTS: "/api/admin-tenant-exists/",
   PAYMENTS_TOTAL: "/api/payments-total/",
   PAYMENTS_BY_TENANT: "/api/payments-by-tenant/",

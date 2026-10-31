@@ -13,6 +13,7 @@ import { Icon } from "@/app/components/ui";
 const NAV_ITEMS = [
   { label: "Negocios", href: "/negocios" },
   { label: "Pagos", href: "/pagos" },
+  { label: "Planes", href: "/planes" },
   { label: "Inversión", href: "/inversion" },
 ];
 
