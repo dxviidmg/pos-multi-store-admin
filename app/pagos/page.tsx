@@ -12,13 +12,7 @@ import { ErrorAlert, PageHeader, Panel, StatCard } from "@/app/components/ui";
 import { EarningsService } from "@/app/services/earnings.service";
 import { TenantError } from "@/app/domain/tenant.types";
 import { TenantPaymentHistory } from "@/app/domain/earnings.types";
-
-function currency(value: number): string {
-  return new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-  }).format(value);
-}
+import { formatCurrency } from "@/app/utils/earnings";
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "—";
@@ -221,13 +215,13 @@ function PagosContent() {
               <StatCard
                 icon="income"
                 label="Total cobrado"
-                value={currency(totals.totalPaid)}
+                value={formatCurrency(totals.totalPaid)}
                 tone="positive"
               />
               <StatCard
                 icon="alert"
                 label="No cobrado (estimado)"
-                value={currency(totalUncollected)}
+                value={formatCurrency(totalUncollected)}
                 tone={totalUncollected > 0 ? "negative" : "positive"}
                 hint="Esperado menos recibido, sumado de todos los clientes."
               />
@@ -281,13 +275,13 @@ function PagosContent() {
                                 </span>
                               </td>
                               <td className="px-5 py-3 text-right text-sm font-semibold tabular-nums text-green-700">
-                                {currency(h.total_paid)}
+                                {formatCurrency(h.total_paid)}
                               </td>
                               <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
-                                {b ? currency(b.expected) : "—"}
+                                {b ? formatCurrency(b.expected) : "—"}
                                 {b && (
                                   <span className="block text-xs text-caption">
-                                    {currency(b.rate)}/mes × {b.monthsExpected}{" "}
+                                    {formatCurrency(b.rate)}/mes × {b.monthsExpected}{" "}
                                     {b.monthsExpected === 1 ? "mes" : "meses"}
                                     {b.cancelled && " (hasta cancelación)"}
                                   </span>
@@ -306,7 +300,7 @@ function PagosContent() {
                                 {b?.cancelled
                                   ? "Cancelado"
                                   : uncollected > 0
-                                  ? currency(uncollected)
+                                  ? formatCurrency(uncollected)
                                   : "Al día"}
                               </td>
                               <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
@@ -345,7 +339,7 @@ function PagosContent() {
                                           {p.months === 1 ? "mes" : "meses"}
                                         </span>
                                         <span className="font-semibold tabular-nums text-foreground">
-                                          {currency(p.amount)}
+                                          {formatCurrency(p.amount)}
                                         </span>
                                       </li>
                                     ))}

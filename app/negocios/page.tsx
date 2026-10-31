@@ -9,7 +9,7 @@ import { useAuth } from "@/app/contexts/auth.context";
 import { ProtectedRoute } from "@/app/components/protected-route";
 import { Navbar } from "@/app/components/navbar";
 import { ErrorAlert, PageCard, PageHeader, Panel, StatCard } from "@/app/components/ui";
-import { computeMrr, computePaidThisMonth } from "@/app/utils/earnings";
+import { computeMrr, computePaidThisMonth, formatCurrency } from "@/app/utils/earnings";
 
 type SandboxFilter = "all" | "sandbox" | "real";
 type DomiciliadaFilter = "all" | "yes" | "no";
@@ -50,12 +50,6 @@ function TenantsContent() {
   );
 
   const ready = !state.tenantsLoading && !state.tenantsError;
-
-  const currency = (value: number) =>
-    new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(value);
 
   const formatNextPayment = (dateStr: string | null) => {
     if (!dateStr) return "Sin definir";
@@ -110,14 +104,14 @@ function TenantsContent() {
             <StatCard
               icon="recurring"
               label="MRR (ingreso mensual)"
-              value={currency(mrr)}
+              value={formatCurrency(mrr)}
               tone="positive"
               hint="Mensualidades de los negocios reales activos."
             />
             <StatCard
               icon="income"
               label="Cobrado este mes"
-              value={currency(paidThisMonth.amount)}
+              value={formatCurrency(paidThisMonth.amount)}
               tone="positive"
               hint={
                 mrr > 0
@@ -266,7 +260,7 @@ function TenantsContent() {
                           tenant.is_paid ? "Pagado / vigente" : "Sin pago vigente"
                         }
                       >
-                        {currency(tenant.monthly_amount)}
+                        {formatCurrency(tenant.monthly_amount)}
                         {!tenant.is_paid && (
                           <span className="block text-xs font-normal">
                             Sin pagar
