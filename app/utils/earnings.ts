@@ -41,8 +41,11 @@ export function getTotalDevHours(): number {
 }
 
 /**
- * Ingresos manuales: pagos realmente recibidos pero que no están en la base
- * de datos (p. ej. porque se borraron). Se suman al total de ingresos.
+ * Ingresos manuales: pagos **ya recibidos** que no están en la base de datos
+ * (p. ej. porque se borraron). Se suman todos al total de ingresos sin filtrar
+ * por fecha, porque por convención solo se registran aquí cobros que ya
+ * ocurrieron. No registrar ingresos con fecha futura: se contarían de
+ * inmediato en el total.
  */
 export function getManualIncome(): number {
   const manual = (costsData as { manualIncome?: { amount: number }[] })
@@ -51,12 +54,28 @@ export function getManualIncome(): number {
 }
 
 /**
- * Costo mensual recurrente de infraestructura (ej. Render/OnRender).
- * Suma el `unitCost` de todos los cargos recurrentes del JSON, ya que son
- * cargos que se repiten cada mes.
+ * Indica si un cargo recurrente está vigente hoy: ya empezó (`since` <= mes
+ * actual) y no ha terminado (sin `until`, o `until` en el mes actual o futuro).
+ */
+export function isRecurringActive(
+  r: { since: string; until?: string },
+  now: Date = new Date()
+): boolean {
+  const currentYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  if (r.since > currentYm) return false; // aún no empieza
+  if (r.until && r.until < currentYm) return false; // ya terminó
+  return true;
+}
+
+/**
+ * Costo mensual recurrente de infraestructura vigente hoy (ej. Render).
+ * Suma el `unitCost` solo de los cargos recurrentes activos, excluyendo los
+ * que ya terminaron (p. ej. Heroku, que tiene `until` en el pasado).
  */
 export function getMonthlyRecurringCost(): number {
-  return costsData.recurring.reduce((sum, r) => sum + r.unitCost, 0);
+  return (costsData.recurring as { unitCost: number; since: string; until?: string }[])
+    .filter((r) => isRecurringActive(r))
+    .reduce((sum, r) => sum + r.unitCost, 0);
 }
 
 /**
@@ -74,12 +93,23 @@ type BillableTenant = Pick<
   "has_access" | "is_sandbox" | "is_paid" | "is_cancelled" | "monthly_amount"
 >;
 
-/** Activo y facturable: real (no sandbox), no cancelado y con acceso vigente. */
+/**
+ * Negocio que cuenta para el potencial de facturación: real (no sandbox) y
+ * no cancelado. No se filtra por `has_access` ni `is_paid`: el objetivo es
+ * "cuánto se facturaría si todos pagaran", así que se incluyen también los
+ * vencidos/suspendidos (si pagaran, recuperarían el acceso). El acceso solo
+ * se pierde de forma definitiva al cancelar, caso ya cubierto por
+ * `!is_cancelled`.
+ */
 function isActiveReal(t: BillableTenant): boolean {
   return !t.is_sandbox && !t.is_cancelled;
 }
 
-/** MRR: mensualidades de los negocios reales activos (no cancelados, con acceso). */
+/**
+ * MRR potencial: suma de las mensualidades de los negocios reales no
+ * cancelados, asumiendo que todos pagan. Es la capacidad de facturación
+ * mensual, no el ingreso realmente cobrado.
+ */
 export function computeMrr(tenants: BillableTenant[]): number {
   return tenants.reduce(
     (sum, t) => sum + (isActiveReal(t) ? t.monthly_amount : 0),
@@ -87,16 +117,23 @@ export function computeMrr(tenants: BillableTenant[]): number {
   );
 }
 
-/** Cobrado este mes: mensualidades de los negocios reales activos. */
+/**
+ * MRR pagado: suma de las mensualidades (plan) de los negocios reales
+ * activos que están al corriente (`is_paid`). Cada negocio cuenta una sola
+ * vez por su `monthly_amount`, sin importar que haya pagado varios meses en
+ * un solo pago. Mide qué parte del MRR potencial ya está pagada, no el
+ * efectivo que entró este mes.
+ */
 export function computePaidThisMonth(tenants: BillableTenant[]): {
   amount: number;
   paidCount: number;
   totalCount: number;
 } {
   const active = tenants.filter(isActiveReal);
+  const paid = active.filter((t) => t.is_paid);
   return {
-    amount: active.reduce((sum, t) => sum + t.monthly_amount, 0),
-    paidCount: active.length,
+    amount: paid.reduce((sum, t) => sum + t.monthly_amount, 0),
+    paidCount: paid.length,
     totalCount: active.length,
   };
 }

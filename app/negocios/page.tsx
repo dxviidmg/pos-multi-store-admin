@@ -123,16 +123,16 @@ function TenantsContent() {
               label="MRR (ingreso mensual)"
               value={formatCurrency(mrr)}
               tone="positive"
-              hint="Mensualidades de los negocios reales activos."
+              hint="MRR potencial: mensualidades de los negocios reales no cancelados, si todos pagan."
             />
             <StatCard
               icon="income"
-              label="Cobrado este mes"
+              label="MRR pagado"
               value={formatCurrency(paidThisMonth.amount)}
               tone="positive"
               hint={
                 mrr > 0
-                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR`
+                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR · ${paidThisMonth.paidCount}/${paidThisMonth.totalCount} al corriente`
                   : "Sin MRR para comparar"
               }
             />
