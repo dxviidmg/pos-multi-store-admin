@@ -42,7 +42,7 @@ export function LoginForm() {
             </svg>
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white">
-            POS Admin
+            SVAdmin
           </h2>
           <p className="mt-2 text-sm text-white/70">
             Sistema de gestión de negocios

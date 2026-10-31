@@ -32,7 +32,7 @@ export function Navbar() {
           {/* Marca + menú */}
           <div className="flex items-center gap-8">
             <span className="text-xl font-extrabold tracking-tight text-white">
-              Admin
+              SVAdmin
             </span>
             <nav className="flex items-center gap-1">
               {NAV_ITEMS.map((item) => {
