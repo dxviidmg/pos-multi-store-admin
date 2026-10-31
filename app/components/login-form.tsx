@@ -30,21 +30,21 @@ export function LoginForm() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-brand-dark via-brand to-brand-light px-4 py-12 sm:px-6 lg:px-8">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-      <div className="relative w-full max-w-md space-y-8 rounded-brand bg-paper p-8 shadow-[0_24px_60px_rgba(11,18,51,0.45)] sm:p-10">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6 lg:px-8">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-accent/25 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-brand/15 blur-3xl" />
+      <div className="relative w-full max-w-md space-y-8 rounded-brand bg-gradient-to-br from-brand-dark via-brand to-brand-light p-8 shadow-[0_24px_60px_rgba(11,18,51,0.35)] sm:p-10">
         {/* Header */}
         <div className="text-center">
-          <div aria-hidden="true" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-accent shadow-sm">
+          <div aria-hidden="true" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-brand-dark shadow-sm">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
               <path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6" />
             </svg>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-brand">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white">
             POS Admin
           </h2>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-sm text-white/70">
             Sistema de gestión de negocios
           </p>
         </div>
@@ -80,7 +80,7 @@ export function LoginForm() {
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-semibold text-foreground"
+              className="block text-sm font-semibold text-white"
             >
               Usuario
             </label>
@@ -102,7 +102,7 @@ export function LoginForm() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-semibold text-foreground"
+              className="block text-sm font-semibold text-white"
             >
               Contraseña
             </label>
@@ -141,17 +141,17 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={state.loading}
-            className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+            className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-brand-dark shadow-sm transition-colors hover:bg-accent-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
             {state.loading && (
-              <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none" />
+              <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark/30 border-t-brand-dark motion-reduce:animate-none" />
             )}
             {state.loading ? "Iniciando sesión..." : "Iniciar sesión"}
           </button>
         </form>
 
         {/* Info */}
-        <p className="text-center text-xs text-caption">
+        <p className="text-center text-xs text-white/60">
           Credenciales de prueba: usuario / contraseña
         </p>
       </div>
