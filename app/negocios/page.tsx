@@ -133,7 +133,7 @@ function TenantsContent() {
           title="Listado"
         >
           {ready && (
-<div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+<div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
                   <label htmlFor="sandbox-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
                     Entorno
