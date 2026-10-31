@@ -40,28 +40,33 @@ export interface MonthlyProfit {
 
 type BillableTenant = Pick<
   Tenant,
-  "has_access" | "is_sandbox" | "is_paid" | "monthly_amount"
+  "has_access" | "is_sandbox" | "is_paid" | "is_cancelled" | "monthly_amount"
 >;
 
-/** MRR: mensualidades de los negocios reales con acceso vigente. */
+/** Activo y facturable: real (no sandbox), no cancelado y con acceso vigente. */
+function isActiveReal(t: BillableTenant): boolean {
+  return !t.is_sandbox && !t.is_cancelled;
+}
+
+/** MRR: mensualidades de los negocios reales activos (no cancelados, con acceso). */
 export function computeMrr(tenants: BillableTenant[]): number {
   return tenants.reduce(
-    (sum, t) => sum + (t.has_access && !t.is_sandbox ? t.monthly_amount : 0),
+    (sum, t) => sum + (isActiveReal(t) ? t.monthly_amount : 0),
     0
   );
 }
 
-/** Cobrado este mes: mensualidades de todos los negocios con pago vigente. */
+/** Cobrado este mes: mensualidades de los negocios reales activos. */
 export function computePaidThisMonth(tenants: BillableTenant[]): {
   amount: number;
   paidCount: number;
   totalCount: number;
 } {
-  const paid = tenants.filter((t) => t.is_paid);
+  const active = tenants.filter(isActiveReal);
   return {
-    amount: paid.reduce((sum, t) => sum + t.monthly_amount, 0),
-    paidCount: paid.length,
-    totalCount: tenants.length,
+    amount: active.reduce((sum, t) => sum + t.monthly_amount, 0),
+    paidCount: active.length,
+    totalCount: active.length,
   };
 }
 

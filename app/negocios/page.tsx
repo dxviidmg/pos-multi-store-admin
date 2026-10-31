@@ -36,7 +36,10 @@ function TenantsContent() {
   }, [state.tenants, sandboxFilter, domiciliadaFilter, statusFilter]);
 
   const activeRealCount = useMemo(
-    () => state.tenants.filter((t) => t.has_access && !t.is_sandbox).length,
+    () =>
+      state.tenants.filter(
+        (t) => !t.is_sandbox && !t.is_cancelled && t.has_access
+      ).length,
     [state.tenants]
   );
 
@@ -102,7 +105,7 @@ function TenantsContent() {
               label="Negocios reales activos"
               value={String(activeRealCount)}
               tone="brand"
-              hint="Reales (no sandbox) con acceso vigente."
+              hint="No sandbox, no cancelados y con acceso vigente."
             />
             <StatCard
               icon="recurring"
