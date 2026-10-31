@@ -10,13 +10,10 @@ import { ProtectedRoute } from "@/app/components/protected-route";
 import { Navbar } from "@/app/components/navbar";
 import {
   ErrorAlert,
-  Figure,
-  Icon,
+  PageCard,
   PageHeader,
   Panel,
   StatCard,
-  TONE_CHIP,
-  TONE_TEXT,
 } from "@/app/components/ui";
 import { EarningsService } from "@/app/services/earnings.service";
 import { TenantError } from "@/app/domain/tenant.types";
@@ -73,23 +70,25 @@ function InversionContent() {
 
   const mrr = useMemo(() => computeMrr(state.tenants), [state.tenants]);
 
+  const monthlyProfit = useMemo(() => computeMonthlyProfit(mrr), [mrr]);
+
+  // Recuperación sin considerar Render (a ritmo de MRR) y considerándolo
+  // (a ritmo de ganancia neta mensual = MRR - Render).
   const payback = useMemo(
     () => computePayback(summary.net, mrr),
     [summary.net, mrr]
   );
-
-  const monthlyProfit = useMemo(() => computeMonthlyProfit(mrr), [mrr]);
-
-  const recoveredPct =
-    summary.totalCost > 0
-      ? Math.max(0, Math.min(100, (summary.totalIncome / summary.totalCost) * 100))
-      : 0;
+  const paybackNet = useMemo(
+    () => computePayback(summary.net, monthlyProfit.net),
+    [summary.net, monthlyProfit.net]
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <PageCard>
         <PageHeader
           title="Inversión"
           subtitle="Ingresos menos inversión (desarrollo + costos)."
@@ -101,70 +100,46 @@ function InversionContent() {
 
         {!loading && !error && (
           <>
-            {/* Selector de sueldo */}
-            <Panel
-              title="Escenario de sueldo"
-              subtitle="Valor por hora usado para valuar tu desarrollo."
-              action={
-                <p className="text-xs text-muted tabular-nums sm:text-right">
-                  {formatCurrency(scenario.hourly)}/h ·{" "}
-                  {summary.totalHours.toFixed(0)} h
-                </p>
-              }
+            {/* Ganancia neta mensual (MRR - Render) */}
+            <Panel bare
+              title="Ganancia neta mensual"
+              subtitle="MRR menos el costo mensual de Render."
             >
-              <div
-                role="radiogroup"
-                aria-label="Sueldo mensual para valuar el desarrollo"
-                className="grid grid-cols-2 gap-1 rounded-xl border border-line-strong bg-paper p-1 shadow-sm sm:inline-flex"
-              >
-                {SALARY_SCENARIOS.map((s, i) => (
-                  <button
-                    key={s.monthly}
-                    type="button"
-                    role="radio"
-                    aria-checked={i === salaryIndex}
-                    onClick={() => setSalaryIndex(i)}
-                    className={
-                      "min-h-10 cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold tabular-nums transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 motion-reduce:transition-none sm:px-4 sm:text-sm " +
-                      (i === salaryIndex
-                        ? "bg-brand text-white shadow-sm"
-                        : "text-muted hover:bg-row-hover hover:text-foreground")
-                    }
-                  >
-                    {formatCurrency(s.monthly)}/mes
-                  </button>
-                ))}
-              </div>
-            </Panel>
-
-            {/* Resumen: tarjeta principal + métricas */}
-            <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <HeroCard
-                label="Neto CON desarrollo"
-                value={formatCurrency(summary.net)}
-                positive={summary.net >= 0}
-                hint="Ingresos menos todos los costos, pagándome mi sueldo."
-                recoveredPct={recoveredPct}
-              />
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-2">
-                <StatCard
-                  icon="income"
-                  label="Ingresos"
-                  value={formatCurrency(summary.totalIncome)}
-                  tone="positive"
-                />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <StatCard
                   icon="recurring"
-                  label="MRR (ingreso mensual)"
+                  label="Ingreso mensual (MRR)"
                   value={formatCurrency(monthlyProfit.mrr)}
                   tone="positive"
                   hint="Mensualidades de los negocios activos."
                 />
                 <StatCard
-                  icon="dev"
-                  label="Desarrollo (mi sueldo)"
-                  value={formatCurrency(summary.developmentCost)}
-                  tone="neutral"
+                  icon="wallet"
+                  label="Costo Render / mes"
+                  value={formatCurrency(monthlyProfit.recurringCost)}
+                  tone="negative"
+                />
+                <StatCard
+                  icon={monthlyProfit.net >= 0 ? "up" : "down"}
+                  label="Ganancia neta / mes"
+                  value={formatCurrency(monthlyProfit.net)}
+                  tone={monthlyProfit.net >= 0 ? "positive" : "negative"}
+                  hint="MRR menos costo de Render."
+                />
+              </div>
+            </Panel>
+
+            {/* Balance acumulado (sin valuar mi desarrollo) */}
+            <Panel bare
+              title="Balance acumulado"
+              subtitle="Lo que ha entrado y lo que salió de tu bolsillo, sin contar tu sueldo."
+            >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <StatCard
+                  icon="income"
+                  label="Ingresos"
+                  value={formatCurrency(summary.totalIncome)}
+                  tone="positive"
                 />
                 <StatCard
                   icon="wallet"
@@ -178,83 +153,125 @@ function InversionContent() {
                   value={formatCurrency(summary.netWithoutDevelopment)}
                   tone={summary.netWithoutDevelopment >= 0 ? "positive" : "negative"}
                   hint="Ingresos menos lo que salió de mi bolsillo."
-                  className="sm:col-span-2"
                 />
               </div>
-            </div>
+            </Panel>
 
-            {/* Ganancia neta mensual (MRR - Render) */}
-            <Panel
-              title="Ganancia neta mensual"
-              subtitle="MRR menos el costo mensual de Render."
+            {/* Valuando mi desarrollo (depende del sueldo elegido) */}
+            <Panel bare
+              title="Valor de mi desarrollo"
+              subtitle="Elige el sueldo mensual con el que valuar el trabajo de desarrollo."
+              action={
+                <p className="text-xs text-muted tabular-nums sm:text-right">
+                  {formatCurrency(scenario.hourly)}/h ·{" "}
+                  {summary.totalHours.toFixed(0)} h
+                </p>
+              }
             >
-              <div className="grid grid-cols-1 items-center gap-3 sm:gap-4 sm:grid-cols-[1fr_auto_1fr_auto_1fr]">
-                <Figure
-                  label="Ingreso mensual (MRR)"
-                  value={formatCurrency(monthlyProfit.mrr)}
-                  tone="positive"
+              <div
+                role="radiogroup"
+                aria-label="Sueldo mensual para valuar el desarrollo"
+                className="grid w-full grid-cols-2 border-b border-line sm:grid-cols-4"
+              >
+                {SALARY_SCENARIOS.map((s, i) => (
+                  <button
+                    key={s.monthly}
+                    type="button"
+                    role="radio"
+                    aria-checked={i === salaryIndex}
+                    onClick={() => setSalaryIndex(i)}
+                    className={
+                      "-mb-px min-h-11 w-full cursor-pointer border-b-2 px-3 py-3 text-center text-xs font-semibold tabular-nums transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand motion-reduce:transition-none sm:px-4 sm:text-sm " +
+                      (i === salaryIndex
+                        ? "border-brand text-brand"
+                        : "border-transparent text-muted hover:border-line-strong hover:text-foreground")
+                    }
+                  >
+                    {formatCurrency(s.monthly)}/mes
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <StatCard
+                  icon="dev"
+                  label="Desarrollo (mi sueldo)"
+                  value={formatCurrency(summary.developmentCost)}
+                  tone="neutral"
                 />
-                <Operator>−</Operator>
-                <Figure
-                  label="Costo Render / mes"
-                  value={formatCurrency(monthlyProfit.recurringCost)}
-                  tone="negative"
+                <StatCard
+                  icon="wallet"
+                  label="Total de costos"
+                  value={formatCurrency(summary.totalCost)}
+                  tone="neutral"
+                  hint="Desarrollo + otros costos."
                 />
-                <Operator>=</Operator>
-                <Figure
-                  label="Ganancia neta / mes"
-                  value={formatCurrency(monthlyProfit.net)}
-                  tone={monthlyProfit.net >= 0 ? "positive" : "negative"}
-                  large
+                <StatCard
+                  icon={summary.net >= 0 ? "up" : "down"}
+                  label="Neto CON desarrollo"
+                  value={formatCurrency(summary.net)}
+                  tone={summary.net >= 0 ? "positive" : "negative"}
+                  hint="Ingresos menos todos los costos, pagándome mi sueldo."
                 />
               </div>
             </Panel>
 
             {/* Recuperación de inversión */}
-            <Panel title="Recuperación de inversión">
-              {payback.recovered ? (
-                <p className="flex items-center gap-2 text-sm font-medium text-green-700">
-                  <Icon name="check" className="h-5 w-5 shrink-0" />
-                  Ya recuperaste la inversión. El neto es positivo (
-                  {formatCurrency(summary.net)}).
-                </p>
-              ) : payback.mrr <= 0 ? (
-                <p className="flex items-start gap-2 text-sm text-red-600">
-                  <Icon name="alert" className="mt-0.5 h-5 w-5 shrink-0" />
-                  Aún faltan {formatCurrency(payback.remaining)} por recuperar,
-                  pero no hay ingreso mensual recurrente (MRR) con el cual
-                  proyectar el tiempo de recuperación.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                  <Figure
-                    label="Falta por recuperar"
-                    value={formatCurrency(payback.remaining)}
-                    tone="negative"
+            <Panel bare title="Recuperación de inversión">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {payback.recovered ? (
+                  <StatCard
+                    icon="check"
+                    label="Inversión recuperada"
+                    value={formatCurrency(summary.net)}
+                    tone="positive"
+                    hint="Ya recuperaste la inversión: el neto es positivo."
                   />
-                  <Figure
-                    label="Ingreso mensual (MRR)"
-                    value={formatCurrency(payback.mrr)}
-                    tone="neutral"
-                  />
-                  <Figure
-                    label="Tiempo estimado de recuperación"
-                    value={
-                      payback.months !== null ? formatMonths(payback.months) : "—"
-                    }
-                    tone="brand"
-                    note={
-                      payback.months !== null
-                        ? `≈ ${payback.months.toFixed(1)} meses a este ritmo`
-                        : undefined
-                    }
-                  />
-                </div>
-              )}
+                ) : (
+                  <>
+                    <StatCard
+                      icon="down"
+                      label="Falta por recuperar"
+                      value={formatCurrency(payback.remaining)}
+                      tone="negative"
+                    />
+                    <StatCard
+                      icon="clock"
+                      label="Recuperación sin considerar Render"
+                      value={
+                        payback.months !== null
+                          ? formatMonths(payback.months)
+                          : "—"
+                      }
+                      tone="brand"
+                      hint={
+                        payback.months !== null
+                          ? `${payback.months.toFixed(1)} meses a ${formatCurrency(payback.mrr)}/mes de MRR`
+                          : "Sin MRR para proyectar el tiempo de recuperación."
+                      }
+                    />
+                    <StatCard
+                      icon="clock"
+                      label="Recuperación considerando Render"
+                      value={
+                        paybackNet.months !== null
+                          ? formatMonths(paybackNet.months)
+                          : "—"
+                      }
+                      tone="brand"
+                      hint={
+                        paybackNet.months !== null
+                          ? `${paybackNet.months.toFixed(1)} meses a ${formatCurrency(monthlyProfit.net)}/mes de ganancia neta`
+                          : "La ganancia neta mensual no es positiva: no se recupera a este ritmo."
+                      }
+                    />
+                  </>
+                )}
+              </div>
             </Panel>
 
             {/* Desglose de costos */}
-            <Panel title="Desglose de costos">
+            <Panel bare title="Desglose de costos">
               <div className="overflow-x-auto rounded-xl border border-line">
                 <table className="min-w-full">
                   <thead className="bg-brand">
@@ -300,78 +317,8 @@ function InversionContent() {
             </Panel>
           </>
         )}
+        </PageCard>
       </main>
-    </div>
-  );
-}
-
-function Operator({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-row-hover text-lg font-light text-caption sm:h-auto sm:w-auto sm:rounded-none sm:bg-transparent sm:text-2xl"
-    >
-      {children}
-    </span>
-  );
-}
-
-function HeroCard({
-  label,
-  value,
-  positive,
-  hint,
-  recoveredPct,
-}: {
-  label: string;
-  value: string;
-  positive: boolean;
-  hint: string;
-  recoveredPct: number;
-}) {
-  return (
-    <div className="flex flex-col justify-between rounded-brand border border-line bg-row-hover p-5 shadow-sm">
-      <div>
-        <p className="flex items-center gap-2 text-sm font-medium text-muted">
-          <span
-            className={
-              "flex h-8 w-8 items-center justify-center rounded-lg " +
-              (positive ? TONE_CHIP.positive : TONE_CHIP.negative)
-            }
-          >
-            <Icon name={positive ? "up" : "down"} className="h-4 w-4" />
-          </span>
-          {label}
-        </p>
-        <p
-          className={
-            "mt-3 text-3xl font-bold tracking-tight tabular-nums " +
-            (positive ? TONE_TEXT.positive : TONE_TEXT.negative)
-          }
-        >
-          {value}
-        </p>
-        <p className="mt-2 text-xs text-caption">{hint}</p>
-      </div>
-      <div className="mt-5">
-        <div className="mb-1.5 flex justify-between text-xs text-muted">
-          <span>Ingresos vs. costos totales</span>
-          <span className="tabular-nums">{recoveredPct.toFixed(0)}%</span>
-        </div>
-        <div
-          role="progressbar"
-          aria-label="Porcentaje de costos cubierto por ingresos"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(recoveredPct)}
-          className="h-2 overflow-hidden rounded-full bg-line-strong/60"
-        >
-          <div
-            className="h-full rounded-full bg-accent transition-[width] duration-700 ease-out motion-reduce:transition-none"
-            style={{ width: `${recoveredPct}%` }}
-          />
-        </div>
-      </div>
     </div>
   );
 }
@@ -381,13 +328,10 @@ function InversionSkeleton() {
     <div role="status" aria-live="polite" className="animate-pulse motion-reduce:animate-none">
       <span className="sr-only">Cargando ingresos...</span>
       <div className="mb-5 h-20 rounded-brand bg-line" />
-      <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="h-48 rounded-brand bg-line" />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-2">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-24 rounded-brand bg-line" />
-          ))}
-        </div>
+      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-24 rounded-brand bg-line" />
+        ))}
       </div>
       <div className="h-36 rounded-brand bg-line" />
     </div>
