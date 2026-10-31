@@ -46,7 +46,7 @@ function monthsSince(fromDate: string | null): number {
 }
 
 interface ExpectedBreakdown {
-  rate: number; // precio de referencia (pago máximo histórico)
+  rate: number; // tarifa mensual de referencia (máx. de total/meses por pago)
   monthsExpected: number; // meses desde la creación del tenant hasta hoy
   expected: number; // rate * monthsExpected
   received: number; // suma de pagos
@@ -55,7 +55,9 @@ interface ExpectedBreakdown {
 
 /**
  * Esperado vs. recibido por cliente.
- * Precio de referencia = pago máximo histórico del cliente.
+ * Tarifa mensual de referencia = máximo de (monto / meses) entre sus pagos,
+ * de modo que un pago de varios meses (p. ej. 3 meses juntos) no infle la
+ * tarifa; se normaliza a costo por mes.
  * Meses esperados = desde la creación del tenant hasta hoy (inclusive).
  * Si no hay fecha de creación, cae al primer pago como respaldo.
  */
@@ -63,7 +65,10 @@ function computeExpected(
   h: TenantPaymentHistory,
   tenantCreatedAt: string | null
 ): ExpectedBreakdown {
-  const rate = h.payments.reduce((m, p) => Math.max(m, p.amount), 0);
+  const rate = h.payments.reduce((m, p) => {
+    const months = p.months && p.months > 0 ? p.months : 1;
+    return Math.max(m, p.amount / months);
+  }, 0);
   const startDate = tenantCreatedAt ?? h.first_payment;
   const monthsExpected = monthsSince(startDate);
   const expected = rate * monthsExpected;
@@ -127,7 +132,7 @@ function PagosContent() {
     return { totalPaid };
   }, [filtered]);
 
-  // Esperado vs. recibido por cliente (precio = pago máximo, meses desde la
+  // Esperado vs. recibido por cliente (tarifa = máx. monto/mes, meses desde la
   // fecha de creación del tenant hasta hoy).
   const breakdowns = useMemo(() => {
     const createdAtByTenant = new Map<number, string | null>(
