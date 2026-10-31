@@ -29,28 +29,38 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-/** Meses transcurridos (inclusive) desde `fromDate` hasta hoy. */
-function monthsSince(fromDate: string | null): number {
-  if (!fromDate) return 0;
-  // Acepta "YYYY-MM-DD" o un datetime ISO completo (created_at del tenant).
-  const from = new Date(
-    fromDate.includes("T") ? fromDate : fromDate + "T00:00:00"
-  );
-  if (isNaN(from.getTime())) return 0;
-  const now = new Date();
+/** Convierte "YYYY-MM-DD" o un datetime ISO a Date (o null si inválida). */
+function parseDate(value: string | null): Date | null {
+  if (!value) return null;
+  const d = new Date(value.includes("T") ? value : value + "T00:00:00");
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Meses transcurridos (inclusive) desde `fromDate` hasta `toDate` (por
+ * defecto hoy). Mínimo 1.
+ */
+function monthsBetween(
+  fromDate: string | null,
+  toDate: string | null = null
+): number {
+  const from = parseDate(fromDate);
+  if (!from) return 0;
+  const to = parseDate(toDate) ?? new Date();
   const months =
-    (now.getFullYear() - from.getFullYear()) * 12 +
-    (now.getMonth() - from.getMonth()) +
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth()) +
     1; // +1 para incluir el mes de inicio.
   return Math.max(months, 1);
 }
 
 interface ExpectedBreakdown {
   rate: number; // tarifa mensual de referencia (máx. de total/meses por pago)
-  monthsExpected: number; // meses desde la creación del tenant hasta hoy
+  monthsExpected: number; // meses desde la creación hasta hoy (o cancelación)
   expected: number; // rate * monthsExpected
   received: number; // suma de pagos
   diff: number; // expected - received (lo no cobrado); <=0 significa al corriente
+  cancelled: boolean; // si el tenant está cancelado (corta el periodo)
 }
 
 /**
@@ -58,19 +68,24 @@ interface ExpectedBreakdown {
  * Tarifa mensual de referencia = máximo de (monto / meses) entre sus pagos,
  * de modo que un pago de varios meses (p. ej. 3 meses juntos) no infle la
  * tarifa; se normaliza a costo por mes.
- * Meses esperados = desde la creación del tenant hasta hoy (inclusive).
+ * Meses esperados = desde la creación del tenant hasta HOY, salvo que el
+ * negocio esté cancelado: entonces se cuenta hasta la fecha de cancelación
+ * (después de cancelar ya no se espera cobro).
  * Si no hay fecha de creación, cae al primer pago como respaldo.
  */
 function computeExpected(
   h: TenantPaymentHistory,
-  tenantCreatedAt: string | null
+  tenantCreatedAt: string | null,
+  tenantCancelledAt: string | null
 ): ExpectedBreakdown {
   const rate = h.payments.reduce((m, p) => {
     const months = p.months && p.months > 0 ? p.months : 1;
     return Math.max(m, p.amount / months);
   }, 0);
   const startDate = tenantCreatedAt ?? h.first_payment;
-  const monthsExpected = monthsSince(startDate);
+  const cancelled = Boolean(tenantCancelledAt);
+  const endDate = cancelled ? tenantCancelledAt : null; // null => hoy
+  const monthsExpected = monthsBetween(startDate, endDate);
   const expected = rate * monthsExpected;
   const received = h.total_paid;
   return {
@@ -79,6 +94,7 @@ function computeExpected(
     expected,
     received,
     diff: expected - received,
+    cancelled,
   };
 }
 
@@ -133,15 +149,16 @@ function PagosContent() {
   }, [filtered]);
 
   // Esperado vs. recibido por cliente (tarifa = máx. monto/mes, meses desde la
-  // fecha de creación del tenant hasta hoy).
+  // creación del tenant hasta hoy, o hasta la cancelación si está cancelado).
   const breakdowns = useMemo(() => {
-    const createdAtByTenant = new Map<number, string | null>(
-      state.tenants.map((t) => [t.id, t.created_at])
-    );
+    const tenantById = new Map(state.tenants.map((t) => [t.id, t]));
     const map = new Map<number, ExpectedBreakdown>();
     for (const h of filtered) {
-      const createdAt = createdAtByTenant.get(h.tenant_id) ?? null;
-      map.set(h.tenant_id, computeExpected(h, createdAt));
+      const t = tenantById.get(h.tenant_id);
+      map.set(
+        h.tenant_id,
+        computeExpected(h, t?.created_at ?? null, t?.cancelled_at ?? null)
+      );
     }
     return map;
   }, [filtered, state.tenants]);
@@ -263,6 +280,7 @@ function PagosContent() {
                                   <span className="block text-xs text-caption">
                                     {currency(b.rate)}/mes × {b.monthsExpected}{" "}
                                     {b.monthsExpected === 1 ? "mes" : "meses"}
+                                    {b.cancelled && " (hasta cancelación)"}
                                   </span>
                                 )}
                               </td>

@@ -8,6 +8,7 @@ export interface Tenant {
   short_name: string;
   is_sandbox: boolean;
   is_cancelled: boolean;
+  cancelled_at: string | null;
   is_domiciliada: boolean;
   subscription_status: "active" | "expired" | "cancelled";
   has_access: boolean;
