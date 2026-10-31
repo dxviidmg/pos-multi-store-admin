@@ -70,30 +70,34 @@ interface ExpectedBreakdown {
  * tarifa; se normaliza a costo por mes.
  * Meses esperados = desde la creación del tenant hasta HOY, salvo que el
  * negocio esté cancelado: entonces se cuenta hasta la fecha de cancelación
- * (después de cancelar ya no se espera cobro).
+ * y el "no cobrado" pasa a 0 (una vez cancelado no se espera más cobro).
  * Si no hay fecha de creación, cae al primer pago como respaldo.
  */
 function computeExpected(
   h: TenantPaymentHistory,
   tenantCreatedAt: string | null,
-  tenantCancelledAt: string | null
+  tenantCancelledAt: string | null,
+  tenantIsCancelled: boolean
 ): ExpectedBreakdown {
   const rate = h.payments.reduce((m, p) => {
     const months = p.months && p.months > 0 ? p.months : 1;
     return Math.max(m, p.amount / months);
   }, 0);
   const startDate = tenantCreatedAt ?? h.first_payment;
-  const cancelled = Boolean(tenantCancelledAt);
+  // Cancelado por el flag o por tener fecha de cancelación.
+  const cancelled = tenantIsCancelled || Boolean(tenantCancelledAt);
   const endDate = cancelled ? tenantCancelledAt : null; // null => hoy
   const monthsExpected = monthsBetween(startDate, endDate);
   const expected = rate * monthsExpected;
   const received = h.total_paid;
+  // Si está cancelado, no se considera nada como no cobrado.
+  const diff = cancelled ? 0 : expected - received;
   return {
     rate,
     monthsExpected,
     expected,
     received,
-    diff: expected - received,
+    diff,
     cancelled,
   };
 }
@@ -157,7 +161,12 @@ function PagosContent() {
       const t = tenantById.get(h.tenant_id);
       map.set(
         h.tenant_id,
-        computeExpected(h, t?.created_at ?? null, t?.cancelled_at ?? null)
+        computeExpected(
+          h,
+          t?.created_at ?? null,
+          t?.cancelled_at ?? null,
+          Boolean(t?.is_cancelled)
+        )
       );
     }
     return map;
@@ -287,12 +296,18 @@ function PagosContent() {
                               <td
                                 className={
                                   "px-5 py-3 text-right text-sm font-semibold tabular-nums " +
-                                  (uncollected > 0
+                                  (b?.cancelled
+                                    ? "text-muted"
+                                    : uncollected > 0
                                     ? "text-red-600"
                                     : "text-green-700")
                                 }
                               >
-                                {uncollected > 0 ? currency(uncollected) : "Al día"}
+                                {b?.cancelled
+                                  ? "Cancelado"
+                                  : uncollected > 0
+                                  ? currency(uncollected)
+                                  : "Al día"}
                               </td>
                               <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
                                 {h.payments_count}
