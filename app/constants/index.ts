@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   ADMIN_TENANT_EXISTS: "/api/admin-tenant-exists/",
   PAYMENTS_TOTAL: "/api/payments-total/",
   PAYMENTS_BY_TENANT: "/api/payments-by-tenant/",
+  PAYMENTS_CREATE: "/api/payments/create/",
 };
 
 export const STORAGE_KEYS = {

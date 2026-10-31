@@ -39,6 +39,16 @@ export interface PaymentsTotal {
   payments_count: number;
 }
 
+/** Resultado del alta manual de un pago desde el admin. */
+export interface CreatePaymentResult {
+  id: number;
+  tenant_id: number;
+  months: number;
+  total: number;
+  start_of_validity: string | null;
+  end_of_validity: string | null;
+}
+
 /** Un pago individual del histórico de un tenant. */
 export interface TenantPayment {
   id: number;

@@ -10,7 +10,9 @@ import { ProtectedRoute } from "@/app/components/protected-route";
 import { Navbar } from "@/app/components/navbar";
 import { ErrorAlert, PageCard, PageHeader, Panel, PrimaryButton, StatCard } from "@/app/components/ui";
 import { CreateTenantModal } from "@/app/components/create-tenant-modal";
+import { CreatePaymentModal } from "@/app/components/create-payment-modal";
 import { computeMrr, computePaidThisMonth, formatCurrency } from "@/app/utils/earnings";
+import { Tenant } from "@/app/domain/tenant.types";
 
 type SandboxFilter = "all" | "sandbox" | "real";
 type DomiciliadaFilter = "all" | "yes" | "no";
@@ -24,6 +26,7 @@ function TenantsContent() {
     useState<DomiciliadaFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [showCreate, setShowCreate] = useState(false);
+  const [payingTenant, setPayingTenant] = useState<Tenant | null>(null);
 
   const filteredTenants = useMemo(() => {
     return state.tenants.filter((tenant) => {
@@ -96,6 +99,15 @@ function TenantsContent() {
           <CreateTenantModal
             token={state.token}
             onClose={() => setShowCreate(false)}
+            onCreated={refreshTenants}
+          />
+        )}
+
+        {payingTenant && state.token && (
+          <CreatePaymentModal
+            token={state.token}
+            tenant={payingTenant}
+            onClose={() => setPayingTenant(null)}
             onCreated={refreshTenants}
           />
         )}
@@ -236,6 +248,9 @@ function TenantsContent() {
                     <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                       Próximo pago
                     </th>
+                    <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold text-white/80 uppercase tracking-wider">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-row-divider">
@@ -286,6 +301,17 @@ function TenantsContent() {
                       </td>
                       <td className="px-5 py-3 text-sm text-muted">
                         {formatNextPayment(tenant.next_payment_date)}
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        {!tenant.is_cancelled && (
+                          <button
+                            type="button"
+                            onClick={() => setPayingTenant(tenant)}
+                            className="inline-flex min-h-9 cursor-pointer items-center rounded-lg border border-brand px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand motion-reduce:transition-none"
+                          >
+                            + Pago
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
