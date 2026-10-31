@@ -13,6 +13,7 @@ import { computeMrr, computePaidThisMonth } from "@/app/utils/earnings";
 
 type SandboxFilter = "all" | "sandbox" | "real";
 type DomiciliadaFilter = "all" | "yes" | "no";
+type StatusFilter = "active" | "cancelled" | "all";
 
 function TenantsContent() {
   const { state } = useAuth();
@@ -20,6 +21,7 @@ function TenantsContent() {
   const [sandboxFilter, setSandboxFilter] = useState<SandboxFilter>("all");
   const [domiciliadaFilter, setDomiciliadaFilter] =
     useState<DomiciliadaFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
 
   const filteredTenants = useMemo(() => {
     return state.tenants.filter((tenant) => {
@@ -27,9 +29,11 @@ function TenantsContent() {
       if (sandboxFilter === "real" && tenant.is_sandbox) return false;
       if (domiciliadaFilter === "yes" && !tenant.is_domiciliada) return false;
       if (domiciliadaFilter === "no" && tenant.is_domiciliada) return false;
+      if (statusFilter === "active" && tenant.is_cancelled) return false;
+      if (statusFilter === "cancelled" && !tenant.is_cancelled) return false;
       return true;
     });
-  }, [state.tenants, sandboxFilter, domiciliadaFilter]);
+  }, [state.tenants, sandboxFilter, domiciliadaFilter, statusFilter]);
 
   const activeRealCount = useMemo(
     () => state.tenants.filter((t) => t.has_access && !t.is_sandbox).length,
@@ -145,6 +149,23 @@ function TenantsContent() {
                   </select>
                 </div>
                 <div>
+                  <label htmlFor="status-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
+                    Estado
+                  </label>
+                  <select
+                    id="status-filter"
+                    value={statusFilter}
+                    onChange={(e) =>
+                      setStatusFilter(e.target.value as StatusFilter)
+                    }
+                    className="min-h-9 w-full cursor-pointer rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                  >
+                    <option value="active">Activos</option>
+                    <option value="cancelled">Cancelados</option>
+                    <option value="all">Todos</option>
+                  </select>
+                </div>
+                <div>
                   <label htmlFor="domiciliada-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
                     Domiciliada
                   </label>
@@ -211,6 +232,11 @@ function TenantsContent() {
                         <span className="font-normal text-caption">
                           ({tenant.short_name})
                         </span>
+                        {tenant.is_cancelled && (
+                          <span className="ml-2 inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 align-middle text-xs font-semibold text-red-700">
+                            Cancelado
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-3 text-sm">
                         <span
