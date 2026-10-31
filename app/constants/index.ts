@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
   LOGOUT: "/api/auth/logout/",
   TENANTS: "/api/tenants/",
   TENANTS_CREATE: "/api/tenants/create/",
+  ADMIN_PLANS: "/api/admin-plans/",
+  ADMIN_TENANT_EXISTS: "/api/admin-tenant-exists/",
   PAYMENTS_TOTAL: "/api/payments-total/",
   PAYMENTS_BY_TENANT: "/api/payments-by-tenant/",
 };

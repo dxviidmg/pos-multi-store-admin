@@ -28,6 +28,15 @@ export interface CreateTenantInput {
   plan_id?: number | null;
 }
 
+/** Plan ofrecible a un negocio. */
+export interface Plan {
+  id: number;
+  name: string;
+  price: number;
+  stores: number;
+  billing_type: string; // "M" mensual, "S" suscripción
+}
+
 /** Respuesta del alta manual de un negocio. */
 export interface CreateTenantResult {
   id: number;
@@ -59,5 +68,21 @@ export class TenantService {
       input,
       tenantApiErrors
     );
+  }
+
+  /** Lista los planes ofrecibles a un negocio. Requiere superusuario. */
+  static getPlans(token: string): Promise<Plan[]> {
+    return apiGet<Plan[]>(API_ENDPOINTS.ADMIN_PLANS, token, tenantApiErrors);
+  }
+
+  /** Verifica si un short_name ya está en uso. Requiere superusuario. */
+  static checkShortNameExists(
+    token: string,
+    shortName: string
+  ): Promise<{ exists: boolean }> {
+    const url = `${API_ENDPOINTS.ADMIN_TENANT_EXISTS}?short_name=${encodeURIComponent(
+      shortName
+    )}`;
+    return apiGet<{ exists: boolean }>(url, token, tenantApiErrors);
   }
 }
