@@ -67,7 +67,7 @@ function TenantsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
       {/* Main Content */}
@@ -110,7 +110,7 @@ function TenantsContent() {
         )}
 
         {/* Lista de negocios (tenants) */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white rounded-brand shadow-[0_8px_30px_rgba(15,23,42,0.06)] p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
               Negocios (tenants)
@@ -134,7 +134,7 @@ function TenantsContent() {
                   onChange={(e) =>
                     setSandboxFilter(e.target.value as SandboxFilter)
                   }
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 >
                   <option value="all">Todos</option>
                   <option value="real">Reales</option>
@@ -150,7 +150,7 @@ function TenantsContent() {
                   onChange={(e) =>
                     setDomiciliadaFilter(e.target.value as DomiciliadaFilter)
                   }
-                  className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 >
                   <option value="all">Todas</option>
                   <option value="yes">Domiciliadas</option>
@@ -191,28 +191,28 @@ function TenantsContent() {
             filteredTenants.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
+                  <thead className="bg-brand">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Nombre
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Entorno
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Domiciliada
                       </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-right text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Pago mensual
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Próximo pago
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {filteredTenants.map((tenant) => (
-                      <tr key={tenant.id} className="hover:bg-gray-50">
+                      <tr key={tenant.id} className="hover:bg-row-hover">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">
                           {tenant.name}{" "}
                           <span className="font-normal text-gray-500">
@@ -273,13 +273,13 @@ function TenantsContent() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-blue-700">Total de sucursales</p>
+                <p className="text-sm text-brand">Total de sucursales</p>
                 <p className="text-lg font-medium text-blue-900">
                   {state.storeCount}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-blue-700">Acceso bloqueado</p>
+                <p className="text-sm text-brand">Acceso bloqueado</p>
                 <p className="text-lg font-medium text-blue-900">
                   {state.accessBlocked ? "Sí" : "No"}
                 </p>

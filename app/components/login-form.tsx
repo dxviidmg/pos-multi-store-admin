@@ -29,15 +29,15 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 rounded-brand bg-paper p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            POS Admin - Tenants
+          <h2 className="text-3xl font-extrabold tracking-tight text-brand">
+            POS Admin
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sistema de gestión de tenants
+          <p className="mt-2 text-sm text-muted">
+            Sistema de gestión de negocios
           </p>
         </div>
 
@@ -84,7 +84,7 @@ export function LoginForm() {
               value={credentials.username}
               onChange={handleInputChange}
               disabled={state.loading}
-              className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed sm:text-sm"
+              className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-brand focus:outline-none focus:ring-brand disabled:bg-gray-100 disabled:cursor-not-allowed sm:text-sm"
               placeholder="usuario"
             />
           </div>
@@ -106,7 +106,7 @@ export function LoginForm() {
               value={credentials.password}
               onChange={handleInputChange}
               disabled={state.loading}
-              className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed sm:text-sm"
+              className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-brand focus:outline-none focus:ring-brand disabled:bg-gray-100 disabled:cursor-not-allowed sm:text-sm"
               placeholder="contraseña"
             />
           </div>
@@ -115,7 +115,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={state.loading}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="group relative flex w-full justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {state.loading ? "Iniciando sesión..." : "Iniciar sesión"}
           </button>

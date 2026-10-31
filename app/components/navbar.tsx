@@ -25,12 +25,12 @@ export function Navbar() {
   };
 
   return (
-    <header className="bg-white shadow">
+    <header className="bg-brand shadow">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Marca + menú */}
           <div className="flex items-center gap-8">
-            <span className="text-xl font-bold tracking-tight text-gray-900">
+            <span className="text-xl font-extrabold tracking-tight text-white">
               Admin
             </span>
             <nav className="flex items-center gap-1">
@@ -44,10 +44,10 @@ export function Navbar() {
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
                     className={
-                      "rounded-md px-3 py-2 text-sm font-medium transition-colors " +
+                      "rounded-md px-3 py-2 text-sm font-semibold transition-colors " +
                       (isActive
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900")
+                        ? "bg-white/15 text-white"
+                        : "text-white/70 hover:bg-white/10 hover:text-white")
                     }
                   >
                     {item.label}
@@ -60,13 +60,13 @@ export function Navbar() {
           {/* Usuario + logout */}
           <div className="flex items-center gap-4">
             {state.user?.fullName && (
-              <span className="hidden text-sm text-gray-600 sm:inline">
+              <span className="hidden text-sm text-white/80 sm:inline">
                 {state.user.fullName}
               </span>
             )}
             <button
               onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="px-4 py-2 text-sm font-semibold text-white bg-white/10 rounded-md hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40"
             >
               Cerrar sesión
             </button>

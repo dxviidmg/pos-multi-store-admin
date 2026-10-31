@@ -77,7 +77,7 @@ function InversionContent() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -115,7 +115,7 @@ function InversionContent() {
                     className={
                       "px-4 py-2 text-sm font-medium rounded-md transition-colors " +
                       (i === salaryIndex
-                        ? "bg-blue-600 text-white"
+                        ? "bg-brand text-white"
                         : "text-gray-600 hover:bg-gray-100")
                     }
                   >
@@ -165,7 +165,7 @@ function InversionContent() {
             </div>
 
             {/* Recuperación de inversión */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="bg-white rounded-brand shadow-[0_8px_30px_rgba(15,23,42,0.06)] p-6 mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 Recuperación de inversión
               </h2>
@@ -201,7 +201,7 @@ function InversionContent() {
                     <p className="text-sm text-gray-500">
                       Tiempo estimado de recuperación
                     </p>
-                    <p className="text-xl font-bold text-blue-700 mt-1">
+                    <p className="text-xl font-bold text-brand mt-1">
                       {payback.months !== null
                         ? formatMonths(payback.months)
                         : "—"}
@@ -217,28 +217,28 @@ function InversionContent() {
             </div>
 
             {/* Desglose de costos */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-brand shadow-[0_8px_30px_rgba(15,23,42,0.06)] p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 Desglose de costos
               </h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
+                  <thead className="bg-brand">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Concepto
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Detalle
                       </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-right text-xs font-semibold text-white/80 uppercase tracking-wider">
                         Importe
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {summary.rows.map((row, i) => (
-                      <tr key={i} className="hover:bg-gray-50">
+                      <tr key={i} className="hover:bg-row-hover">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">
                           {row.description}
                         </td>
@@ -286,7 +286,7 @@ function SummaryCard({
   hint?: string;
 }) {
   return (
-    <div className="bg-white rounded-lg shadow p-5">
+    <div className="bg-white rounded-brand shadow-[0_8px_30px_rgba(15,23,42,0.06)] p-5">
       <p className="text-sm text-gray-500">{label}</p>
       <p className={"text-2xl font-bold mt-1 " + color}>{value}</p>
       {hint && <p className="text-xs text-gray-400 mt-2">{hint}</p>}
