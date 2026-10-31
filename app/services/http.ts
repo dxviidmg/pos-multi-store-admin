@@ -58,11 +58,12 @@ export async function apiGet<T>(
 }
 
 /**
- * POST autenticado con cuerpo JSON que devuelve JSON tipado `T`.
+ * POST/PUT autenticado con cuerpo JSON que devuelve JSON tipado `T`.
  * En respuestas no-OK intenta extraer el campo `error`/`detail` del cuerpo
  * para un mensaje más preciso; si no, usa la fábrica de errores.
  */
-export async function apiPost<T>(
+async function apiWrite<T>(
+  method: "POST" | "PUT",
   path: string,
   token: string,
   body: unknown,
@@ -71,7 +72,7 @@ export async function apiPost<T>(
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
+      method,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Token ${token}`,
@@ -102,4 +103,24 @@ export async function apiPost<T>(
   } catch {
     throw errors.unknown();
   }
+}
+
+/** POST autenticado con cuerpo JSON que devuelve JSON tipado `T`. */
+export function apiPost<T>(
+  path: string,
+  token: string,
+  body: unknown,
+  errors: ApiErrorFactory
+): Promise<T> {
+  return apiWrite<T>("POST", path, token, body, errors);
+}
+
+/** PUT autenticado con cuerpo JSON que devuelve JSON tipado `T`. */
+export function apiPut<T>(
+  path: string,
+  token: string,
+  body: unknown,
+  errors: ApiErrorFactory
+): Promise<T> {
+  return apiWrite<T>("PUT", path, token, body, errors);
 }

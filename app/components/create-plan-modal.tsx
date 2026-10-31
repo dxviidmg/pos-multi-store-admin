@@ -9,27 +9,37 @@
 
 import React, { useState } from "react";
 import { Modal, PrimaryButton } from "@/app/components/ui";
-import { TenantService, CreatePlanInput } from "@/app/services/tenant.service";
+import {
+  TenantService,
+  CreatePlanInput,
+  UpdatePlanInput,
+} from "@/app/services/tenant.service";
 import { PlanStats, TenantError } from "@/app/domain/tenant.types";
 
 type BillingType = "M" | "S";
 
 export function CreatePlanModal({
   token,
+  plan,
   onClose,
   onCreated,
 }: {
   token: string;
+  /** Si se pasa un plan, el modal entra en modo edición. */
+  plan?: PlanStats;
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const [billingType, setBillingType] = useState<BillingType>("M");
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [stores, setStores] = useState("");
+  const isEdit = !!plan;
+  const [billingType, setBillingType] = useState<BillingType>(
+    plan?.billing_type ?? "M"
+  );
+  const [name, setName] = useState(plan?.name ?? "");
+  const [price, setPrice] = useState(plan ? String(plan.price) : "");
+  const [stores, setStores] = useState(plan ? String(plan.stores) : "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [created, setCreated] = useState<PlanStats | null>(null);
+  const [done, setDone] = useState<PlanStats | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,24 +61,35 @@ export function CreatePlanModal({
       return;
     }
 
-    const input: CreatePlanInput = {
-      name: name.trim(),
-      price: priceNum,
-      stores: storesNum,
-      billing_type: billingType,
-    };
-
     setSubmitting(true);
     setError(null);
     try {
-      const result = await TenantService.createPlan(token, input);
-      setCreated(result);
+      let result: PlanStats;
+      if (isEdit && plan) {
+        const input: UpdatePlanInput = {
+          name: name.trim(),
+          price: priceNum,
+          stores: storesNum,
+        };
+        result = await TenantService.updatePlan(token, plan.id, input);
+      } else {
+        const input: CreatePlanInput = {
+          name: name.trim(),
+          price: priceNum,
+          stores: storesNum,
+          billing_type: billingType,
+        };
+        result = await TenantService.createPlan(token, input);
+      }
+      setDone(result);
       onCreated();
     } catch (err) {
       setError(
         err instanceof TenantError
           ? err.message
-          : "No se pudo crear el plan."
+          : isEdit
+            ? "No se pudo actualizar el plan."
+            : "No se pudo crear el plan."
       );
     } finally {
       setSubmitting(false);
@@ -80,15 +101,20 @@ export function CreatePlanModal({
   const labelClass =
     "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted";
 
+  const isSubscription = billingType === "S";
+
   return (
-    <Modal title="Crear plan" onClose={onClose}>
-      {created ? (
+    <Modal title={isEdit ? "Editar plan" : "Crear plan"} onClose={onClose}>
+      {done ? (
         <div className="space-y-4">
           <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
-            <p className="font-semibold">Plan creado correctamente.</p>
-            {created.billing_type === "S" && created.mp_plan_id && (
+            <p className="font-semibold">
+              {isEdit ? "Plan actualizado correctamente." : "Plan creado correctamente."}
+            </p>
+            {done.billing_type === "S" && done.mp_plan_id && (
               <p className="mt-1">
-                Registrado en Mercado Pago (ID: {created.mp_plan_id}).
+                {isEdit ? "Actualizado" : "Registrado"} en Mercado Pago (ID:{" "}
+                {done.mp_plan_id}).
               </p>
             )}
           </div>
@@ -103,12 +129,21 @@ export function CreatePlanModal({
             <select
               id="billing-type"
               value={billingType}
+              disabled={isEdit}
               onChange={(e) => setBillingType(e.target.value as BillingType)}
-              className={inputClass + " cursor-pointer"}
+              className={
+                inputClass +
+                (isEdit ? " cursor-not-allowed opacity-60" : " cursor-pointer")
+              }
             >
               <option value="M">Manual</option>
               <option value="S">Suscripción (Mercado Pago)</option>
             </select>
+            {isEdit && (
+              <p className="mt-1 text-xs text-muted">
+                El tipo de facturación no se puede cambiar.
+              </p>
+            )}
           </div>
 
           <div>
@@ -156,11 +191,19 @@ export function CreatePlanModal({
             </div>
           </div>
 
-          {billingType === "S" && (
+          {isSubscription && !isEdit && (
             <p className="rounded-lg bg-brand/5 px-3 py-2 text-xs text-muted">
               Al crear este plan se registrará automáticamente en Mercado Pago
               (mensual, MXN). Si Mercado Pago rechaza la operación, el plan no
               se creará.
+            </p>
+          )}
+
+          {isSubscription && isEdit && (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              Este plan está vinculado a Mercado Pago. Cambiar el precio aplica
+              solo a nuevas suscripciones; los suscriptores actuales conservan
+              su monto. Si Mercado Pago rechaza el cambio, no se guardará nada.
             </p>
           )}
 
@@ -171,7 +214,13 @@ export function CreatePlanModal({
           )}
 
           <PrimaryButton type="submit" disabled={submitting}>
-            {submitting ? "Creando…" : "Crear plan"}
+            {submitting
+              ? isEdit
+                ? "Guardando…"
+                : "Creando…"
+              : isEdit
+                ? "Guardar cambios"
+                : "Crear plan"}
           </PrimaryButton>
         </form>
       )}

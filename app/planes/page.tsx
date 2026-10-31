@@ -30,6 +30,7 @@ function PlanesContent() {
   const [typeFilter, setTypeFilter] = useState<"all" | "M" | "S">("all");
   const [sandboxFilter, setSandboxFilter] = useState<"all" | "sandbox" | "real">("all");
   const [showCreate, setShowCreate] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<PlanStats | null>(null);
 
   const loadPlans = useCallback(() => {
     if (!state.token) return;
@@ -84,6 +85,15 @@ function PlanesContent() {
             <CreatePlanModal
               token={state.token}
               onClose={() => setShowCreate(false)}
+              onCreated={loadPlans}
+            />
+          )}
+
+          {editingPlan && state.token && (
+            <CreatePlanModal
+              token={state.token}
+              plan={editingPlan}
+              onClose={() => setEditingPlan(null)}
               onCreated={loadPlans}
             />
           )}
@@ -159,6 +169,9 @@ function PlanesContent() {
                           <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                             Negocios con este plan
                           </th>
+                          <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
+                            Acciones
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-row-divider">
@@ -201,6 +214,15 @@ function PlanesContent() {
                             </td>
                             <td className="px-5 py-3 text-right text-sm font-semibold tabular-nums text-foreground">
                               {plan.tenants_count}
+                            </td>
+                            <td className="px-5 py-3 text-right">
+                              <button
+                                type="button"
+                                onClick={() => setEditingPlan(plan)}
+                                className="inline-flex min-h-9 cursor-pointer items-center rounded-lg border border-brand px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand motion-reduce:transition-none"
+                              >
+                                Editar
+                              </button>
                             </td>
                           </tr>
                         ))}

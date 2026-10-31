@@ -4,7 +4,7 @@
 
 import { Tenant, TenantError, PlanStats } from "@/app/domain/tenant.types";
 import { API_ENDPOINTS, ERROR_MESSAGES } from "@/app/constants";
-import { apiGet, apiPost, ApiErrorFactory } from "@/app/services/http";
+import { apiGet, apiPost, apiPut, ApiErrorFactory } from "@/app/services/http";
 
 /** Errores de dominio para las llamadas que requieren superusuario. */
 export const tenantApiErrors: ApiErrorFactory = {
@@ -34,6 +34,13 @@ export interface CreatePlanInput {
   price: number;
   stores: number;
   billing_type: "M" | "S"; // M = manual, S = suscripción
+}
+
+/** Datos editables de un plan existente (el tipo no se puede cambiar). */
+export interface UpdatePlanInput {
+  name: string;
+  price: number;
+  stores: number;
 }
 
 /** Plan ofrecible a un negocio. */
@@ -106,6 +113,24 @@ export class TenantService {
   ): Promise<PlanStats> {
     return apiPost<PlanStats>(
       API_ENDPOINTS.ADMIN_PLAN_CREATE,
+      token,
+      input,
+      tenantApiErrors
+    );
+  }
+
+  /**
+   * Edita un plan existente (nombre, precio, sucursales). Si el plan está
+   * vinculado a Mercado Pago, el backend sincroniza nombre/precio en MP
+   * (todo o nada). Requiere superusuario.
+   */
+  static updatePlan(
+    token: string,
+    planId: number,
+    input: UpdatePlanInput
+  ): Promise<PlanStats> {
+    return apiPut<PlanStats>(
+      API_ENDPOINTS.ADMIN_PLAN_UPDATE(planId),
       token,
       input,
       tenantApiErrors
