@@ -11,6 +11,7 @@ import { useAuth } from "@/app/contexts/auth.context";
 
 const NAV_ITEMS = [
   { label: "Negocios", href: "/negocios" },
+  { label: "Pagos", href: "/pagos" },
   { label: "Inversión", href: "/inversion" },
 ];
 
