@@ -1,6 +1,6 @@
 import React from "react";
 
-export type IconName = "income" | "recurring" | "dev" | "wallet" | "net" | "check" | "alert" | "up" | "down" | "store" | "clock";
+export type IconName = "income" | "recurring" | "dev" | "wallet" | "net" | "check" | "alert" | "up" | "down" | "store" | "clock" | "menu" | "close";
 
 const ICON_PATHS: Record<IconName, string> = {
   income: "M3 17l6-6 4 4 8-8M15 7h6v6",
@@ -14,6 +14,8 @@ const ICON_PATHS: Record<IconName, string> = {
   clock: "M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
   up: "M7 17L17 7M9 7h8v8",
   down: "M7 7l10 10M17 9v8H9",
+  menu: "M4 6h16M4 12h16M4 18h16",
+  close: "M6 6l12 12M18 6L6 18",
 };
 
 export function Icon({ name, className }: { name: IconName; className?: string }) {
@@ -264,9 +266,9 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-t-brand bg-paper shadow-[0_24px_60px_rgba(11,18,51,0.35)] sm:rounded-brand"
+        className="flex max-h-[90vh] w-full max-w-md flex-col rounded-t-brand bg-paper shadow-[0_24px_60px_rgba(11,18,51,0.35)] sm:rounded-brand"
       >
-        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4">
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <button
             type="button"
@@ -279,7 +281,7 @@ export function Modal({
             </svg>
           </button>
         </div>
-        <div className="px-5 py-5">{children}</div>
+        <div className="overflow-y-auto px-5 py-5">{children}</div>
       </div>
     </div>
   );
