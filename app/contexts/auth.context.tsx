@@ -79,7 +79,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
 
     case "LOGOUT":
-      return initialState;
+      return { ...initialState, loading: false };
 
     case "RESTORE_SESSION":
       return {
