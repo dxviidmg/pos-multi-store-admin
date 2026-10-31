@@ -20,6 +20,16 @@ export function getTotalDevHours(): number {
 }
 
 /**
+ * Ingresos manuales: pagos realmente recibidos pero que no están en la base
+ * de datos (p. ej. porque se borraron). Se suman al total de ingresos.
+ */
+export function getManualIncome(): number {
+  const manual = (costsData as { manualIncome?: { amount: number }[] })
+    .manualIncome;
+  return manual ? manual.reduce((sum, r) => sum + r.amount, 0) : 0;
+}
+
+/**
  * Costo mensual recurrente de infraestructura (ej. Render/OnRender).
  * Suma el `unitCost` de todos los cargos recurrentes del JSON, ya que son
  * cargos que se repiten cada mes.

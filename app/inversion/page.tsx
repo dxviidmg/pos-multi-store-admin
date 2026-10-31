@@ -23,6 +23,7 @@ import {
   computeMrr,
   computePayback,
   computeMonthlyProfit,
+  getManualIncome,
   formatCurrency,
   formatMonths,
   recoveryDate,
@@ -64,9 +65,12 @@ function InversionContent() {
 
   const scenario = SALARY_SCENARIOS[salaryIndex];
 
+  const manualIncome = getManualIncome();
+  const dbIncome = totalIncome ?? 0;
+
   const summary = useMemo(
-    () => buildEarningsSummary(totalIncome ?? 0, scenario),
-    [totalIncome, scenario]
+    () => buildEarningsSummary(dbIncome + manualIncome, scenario),
+    [dbIncome, manualIncome, scenario]
   );
 
   const mrr = useMemo(() => computeMrr(state.tenants), [state.tenants]);
@@ -141,6 +145,11 @@ function InversionContent() {
                   label="Ingresos"
                   value={formatCurrency(summary.totalIncome)}
                   tone="positive"
+                  hint={
+                    manualIncome > 0
+                      ? `${formatCurrency(dbIncome)} en sistema + ${formatCurrency(manualIncome)} manuales`
+                      : undefined
+                  }
                 />
                 <StatCard
                   icon="wallet"

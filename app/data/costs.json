@@ -1,4 +1,11 @@
 {
+  "manualIncome": [
+    {
+      "description": "Joyería (pago recibido, no registrado en BD)",
+      "amount": 1500,
+      "month": "2025-01"
+    }
+  ],
   "development": {
     "description": "Desarrollo (tiempo invertido)",
     "minHoursPerSingleCommitDay": 1,
