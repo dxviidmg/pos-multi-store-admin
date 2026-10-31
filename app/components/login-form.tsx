@@ -36,11 +36,13 @@ export function LoginForm() {
       <div className="relative w-full max-w-md space-y-8 rounded-brand bg-gradient-to-br from-brand-dark via-brand to-brand-light p-8 shadow-[0_24px_60px_rgba(11,18,51,0.35)] sm:p-10">
         {/* Header */}
         <div className="text-center">
-          <div aria-hidden="true" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-brand-dark shadow-sm">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-              <path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6" />
-            </svg>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/icon.svg"
+            alt=""
+            aria-hidden="true"
+            className="mx-auto mb-4 h-16 w-16 rounded-2xl shadow-lg ring-1 ring-white/20"
+          />
           <h2 className="text-3xl font-extrabold tracking-tight text-white">
             SVAdmin
           </h2>
