@@ -5,7 +5,7 @@
  * negocios (tenants) tienen cada plan asignado.
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/app/contexts/auth.context";
 import { ProtectedRoute } from "@/app/components/protected-route";
 import { Navbar } from "@/app/components/navbar";
@@ -14,9 +14,11 @@ import {
   PageCard,
   PageHeader,
   Panel,
+  PrimaryButton,
 } from "@/app/components/ui";
 import { TenantService } from "@/app/services/tenant.service";
 import { PlanStats, TenantError } from "@/app/domain/tenant.types";
+import { CreatePlanModal } from "@/app/components/create-plan-modal";
 import { formatCurrency } from "@/app/utils/earnings";
 
 function PlanesContent() {
@@ -27,32 +29,28 @@ function PlanesContent() {
   const [error, setError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<"all" | "M" | "S">("all");
   const [sandboxFilter, setSandboxFilter] = useState<"all" | "sandbox" | "real">("all");
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  const loadPlans = useCallback(() => {
     if (!state.token) return;
-    let cancelled = false;
+    const token = state.token;
     setLoading(true);
     setError(null);
-    TenantService.getPlansWithStats(state.token)
-      .then((data) => {
-        if (!cancelled) setPlans(data);
-      })
+    TenantService.getPlansWithStats(token)
+      .then(setPlans)
       .catch((err) => {
-        if (!cancelled) {
-          setError(
-            err instanceof TenantError
-              ? err.message
-              : "No se pudieron obtener los planes."
-          );
-        }
+        setError(
+          err instanceof TenantError
+            ? err.message
+            : "No se pudieron obtener los planes."
+        );
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .finally(() => setLoading(false));
   }, [state.token]);
+
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
 
   const filteredPlans = useMemo(() => {
     const list = plans ?? [];
@@ -73,7 +71,22 @@ function PlanesContent() {
           <PageHeader
             title="Planes"
             subtitle="Planes disponibles, su precio y cuántos negocios los usan."
+            action={
+              state.token ? (
+                <PrimaryButton onClick={() => setShowCreate(true)}>
+                  + Nuevo plan
+                </PrimaryButton>
+              ) : undefined
+            }
           />
+
+          {showCreate && state.token && (
+            <CreatePlanModal
+              token={state.token}
+              onClose={() => setShowCreate(false)}
+              onCreated={loadPlans}
+            />
+          )}
 
           {loading && <PlanesSkeleton />}
 

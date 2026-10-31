@@ -28,6 +28,14 @@ export interface CreateTenantInput {
   plan_id?: number | null;
 }
 
+/** Datos para crear un plan desde el admin. */
+export interface CreatePlanInput {
+  name: string;
+  price: number;
+  stores: number;
+  billing_type: "M" | "S"; // M = manual, S = suscripción
+}
+
 /** Plan ofrecible a un negocio. */
 export interface Plan {
   id: number;
@@ -83,6 +91,23 @@ export class TenantService {
     return apiGet<PlanStats[]>(
       API_ENDPOINTS.ADMIN_PLANS_STATS,
       token,
+      tenantApiErrors
+    );
+  }
+
+  /**
+   * Crea un plan. Si es de suscripción ("S"), el backend lo registra también
+   * en Mercado Pago (todo o nada: si MP falla, no se crea nada y lanza error).
+   * Requiere superusuario.
+   */
+  static createPlan(
+    token: string,
+    input: CreatePlanInput
+  ): Promise<PlanStats> {
+    return apiPost<PlanStats>(
+      API_ENDPOINTS.ADMIN_PLAN_CREATE,
+      token,
+      input,
       tenantApiErrors
     );
   }
