@@ -25,6 +25,7 @@ import {
   computeMonthlyProfit,
   formatCurrency,
   formatMonths,
+  recoveryDate,
 } from "@/app/utils/earnings";
 
 function InversionContent() {
@@ -246,7 +247,7 @@ function InversionContent() {
                       tone="brand"
                       hint={
                         payback.months !== null
-                          ? `${payback.months.toFixed(1)} meses a ${formatCurrency(payback.mrr)}/mes de MRR`
+                          ? `≈ ${recoveryDate(payback.months)} · ${payback.months.toFixed(1)} meses a ${formatCurrency(payback.mrr)}/mes de MRR`
                           : "Sin MRR para proyectar el tiempo de recuperación."
                       }
                     />
@@ -261,7 +262,7 @@ function InversionContent() {
                       tone="brand"
                       hint={
                         paybackNet.months !== null
-                          ? `${paybackNet.months.toFixed(1)} meses a ${formatCurrency(monthlyProfit.net)}/mes de ganancia neta`
+                          ? `≈ ${recoveryDate(paybackNet.months)} · ${paybackNet.months.toFixed(1)} meses a ${formatCurrency(monthlyProfit.net)}/mes de ganancia neta`
                           : "La ganancia neta mensual no es positiva: no se recupera a este ritmo."
                       }
                     />

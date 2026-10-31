@@ -202,3 +202,14 @@ export function formatMonths(months: number): string {
   if (rem > 0) parts.push(`${rem} mes${rem > 1 ? "es" : ""}`);
   return parts.length ? parts.join(" y ") : "menos de 1 mes";
 }
+
+/**
+ * Fecha exacta estimada de recuperación: hoy + `months` meses (redondeado
+ * hacia arriba al mes). Devuelve algo como "octubre de 2027".
+ */
+export function recoveryDate(months: number): string {
+  const d = new Date();
+  d.setDate(1); // evita desbordes por días (p. ej. 31 + 1 mes).
+  d.setMonth(d.getMonth() + Math.ceil(months));
+  return d.toLocaleDateString("es-MX", { month: "long", year: "numeric" });
+}
