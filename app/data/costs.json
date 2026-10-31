@@ -24,9 +24,14 @@
       },
       {
         "name": "Frontend Admin (pos-multi-store-admin)",
-        "hours": 12.3
+        "hours": 13.1
+      },
+      {
+        "name": "Print Service (pos_multi_store_print_service)",
+        "hours": 89.6
       }
-    ]
+    ],
+    "totalHours": 1597.4
   },
   "recurring": [
     {
