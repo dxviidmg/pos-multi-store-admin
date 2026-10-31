@@ -42,6 +42,7 @@ const REPO_PATHS = {
   "Frontend POS (pos-multi-store)": resolve(HOME, "pos-multi-store"),
   "Landing (smartventa-landing)": resolve(HOME, "smartventa-landing"),
   "Frontend Admin (pos-multi-store-admin)": resolve(HOME, "pos-multi-store-admin"),
+  "Print Service (pos_multi_store_print_service)": resolve(HOME, "pos_multi_store_print_service"),
 };
 
 // --- Parseo de flags simples ----------------------------------------------
@@ -53,8 +54,8 @@ function getFlag(name, fallback) {
   return fallback;
 }
 
-const MAX_GAP = getFlag("max-gap", 2); // horas máximas entre commits de una sesión
-const FIRST_COMMIT = getFlag("first", 1); // horas asignadas al 1er commit de una sesión
+const MAX_GAP = getFlag("max-gap", 4); // horas máximas entre commits de una sesión
+const FIRST_COMMIT = getFlag("first", 2); // horas asignadas al 1er commit de una sesión
 const DRY_RUN = process.argv.includes("--dry-run");
 
 // --- Lógica -----------------------------------------------------------------
@@ -108,28 +109,40 @@ function main() {
   const repos = costs.development.repos;
 
   console.log(
-    `Estimando horas  (max-gap=${MAX_GAP}h, first=${FIRST_COMMIT}h, autores: ${AUTHOR_EMAILS.join(", ")})\n`
+    `Estimando horas  (max-gap=${MAX_GAP}h, first=${FIRST_COMMIT}h, autores: ${AUTHOR_EMAILS.join(", ")})\n` +
+      `Método: COMBINADO (todos los repos en una sola línea de tiempo)\n`
   );
 
-  let total = 0;
+  // Timestamps combinados de todos los repos, en una sola línea de tiempo.
+  // Este es el método B: el "arranque" (first) se cuenta una sola vez por
+  // sesión global, aunque la sesión toque varios repos el mismo rato.
+  const combined = [];
+
   for (const repo of repos) {
     const path = REPO_PATHS[repo.name];
     if (!path || !dirExists(path)) {
-      console.log(`  ⚠ ${repo.name}: repo no encontrado, se conserva ${repo.hours} h`);
-      total += repo.hours;
+      console.log(`  ⚠ ${repo.name}: repo no encontrado, se omite (horas de referencia ${repo.hours} h)`);
       continue;
     }
     const ts = getCommitTimestamps(path);
-    const hours = Number(estimateHours(ts).toFixed(1));
+    combined.push(...ts);
+    // Horas "en solitario" del repo, solo como referencia informativa.
+    const solo = Number(estimateHours(ts).toFixed(1));
     console.log(
-      `  ${repo.name}: ${ts.length} commits -> ${hours} h` +
-        (repo.hours !== hours ? `  (antes ${repo.hours} h)` : "")
+      `  ${repo.name}: ${ts.length} commits -> ${solo} h (en solitario, referencia)`
     );
-    repo.hours = hours;
-    total += hours;
+    repo.hours = solo;
   }
 
-  console.log(`\n  TOTAL: ${total.toFixed(1)} h`);
+  // Total real = estimación sobre la línea de tiempo combinada y ordenada.
+  combined.sort((a, b) => a - b);
+  const total = Number(estimateHours(combined).toFixed(1));
+  const soloSum = repos.reduce((s, r) => s + r.hours, 0);
+
+  costs.development.totalHours = total;
+
+  console.log(`\n  Suma en solitario (método A): ${soloSum.toFixed(1)} h`);
+  console.log(`  TOTAL COMBINADO (método B): ${total} h  ← se usa este`);
 
   if (DRY_RUN) {
     console.log("\n(dry-run: no se escribió costs.json)");

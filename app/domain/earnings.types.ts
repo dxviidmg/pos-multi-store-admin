@@ -19,7 +19,7 @@ export interface CostRow {
 /** Escenario de sueldo mensual para valuar el desarrollo. */
 export interface SalaryScenario {
   monthly: number;
-  hourly: number; // monthly / 30 / 8
+  hourly: number; // monthly / 176 (22 días hábiles × 8 h)
 }
 
 /** Resumen financiero para un escenario de sueldo dado. */

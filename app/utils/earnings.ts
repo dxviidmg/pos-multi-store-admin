@@ -10,13 +10,34 @@ import {
 } from "@/app/domain/earnings.types";
 import { Tenant } from "@/app/domain/tenant.types";
 
+/**
+ * Horas laborales de un empleado al mes, usadas para convertir un sueldo
+ * mensual en una tarifa por hora.
+ *
+ * Se simula una jornada de empleado estándar: 22 días hábiles (lunes a
+ * viernes, descansando sábado y domingo) × 8 h = 176 h/mes. Esta tarifa
+ * es un *precio por hora*, no un horario: luego se multiplica por las horas
+ * realmente trabajadas (que sí incluyen fines de semana).
+ */
+export const WORK_HOURS_PER_MONTH = 22 * 8; // 176
+
 export const SALARY_SCENARIOS: SalaryScenario[] = [7000, 10000, 15000, 20000, 25000, 30000].map(
-  (monthly) => ({ monthly, hourly: monthly / 30 / 8 })
+  (monthly) => ({ monthly, hourly: monthly / WORK_HOURS_PER_MONTH })
 );
 
-/** Total de horas de desarrollo sumando todos los repos del JSON. */
+/**
+ * Total de horas de desarrollo. Usa el total COMBINADO (`totalHours`), que
+ * calcula las horas tratando todos los repos como una sola línea de tiempo
+ * (sin duplicar el "arranque" cuando una sesión toca varios repos). Si no
+ * existe, cae a la suma por repo (método antiguo).
+ */
 export function getTotalDevHours(): number {
-  return costsData.development.repos.reduce((sum, r) => sum + r.hours, 0);
+  const dev = costsData.development as {
+    totalHours?: number;
+    repos: { hours: number }[];
+  };
+  if (typeof dev.totalHours === "number") return dev.totalHours;
+  return dev.repos.reduce((sum, r) => sum + r.hours, 0);
 }
 
 /**
