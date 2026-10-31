@@ -1,39 +1,111 @@
 {
   "manualIncome": [
     {
-      "description": "Joyería (pago recibido, no registrado en BD)",
+      "description": "Renta no registrada — sistema POS en joyería",
       "amount": 1500,
-      "month": "2025-01"
+      "month": "2025-05"
     }
   ],
   "development": {
-    "description": "Desarrollo (tiempo invertido)",
+    "description": "Desarrollo — tiempo invertido",
     "minHoursPerSingleCommitDay": 1,
     "repos": [
-      { "name": "Backend (pos_multi_store)", "hours": 846.9 },
-      { "name": "Frontend POS (pos-multi-store)", "hours": 1327.1 },
-      { "name": "Landing (smartventa-landing)", "hours": 130.5 },
-      { "name": "Frontend Admin (pos-multi-store-admin)", "hours": 0 }
+      {
+        "name": "Backend (pos_multi_store)",
+        "hours": 828.5
+      },
+      {
+        "name": "Frontend POS (pos-multi-store)",
+        "hours": 1211.6
+      },
+      {
+        "name": "Landing (smartventa-landing)",
+        "hours": 111.9
+      },
+      {
+        "name": "Frontend Admin (pos-multi-store-admin)",
+        "hours": 12.3
+      }
     ]
   },
   "recurring": [
     {
-      "description": "Renta OnRender",
-      "unitCost": 591.5,
+      "description": "Infraestructura — servidor en Render",
+      "unitCost": 600,
       "since": "2025-09",
       "billingDay": 2
+    },
+    {
+      "description": "Infraestructura — servidor en Heroku (migrado a Render)",
+      "unitCost": 225,
+      "since": "2025-01",
+      "until": "2025-08",
+      "billingDay": 1
     }
   ],
   "fixed": [
-    { "quantity": 1, "description": "Branding and naming", "unitCost": 1700, "amount": 1700 },
-    { "quantity": 4, "description": "Impresión de lona", "unitCost": 140, "amount": 560 },
-    { "quantity": 1, "description": "Compra de soporte de lona", "unitCost": 450, "amount": 450 },
-    { "quantity": 1, "description": "Impresiones de tarjetas", "unitCost": 350, "amount": 350 },
-    { "quantity": 4, "description": "X Banner", "unitCost": 292, "amount": 1168 },
-    { "quantity": 1, "description": "Video", "unitCost": 570, "amount": 570 },
-    { "quantity": 7, "description": "Renta Heroku (Enero 2025 a agosto)", "unitCost": 224, "amount": 1568 },
-    { "quantity": 1, "description": "Celery Heroku agosto", "unitCost": 38, "amount": 38 },
-    { "quantity": 1, "description": "Patrocinio concurso de canto Rotaract", "unitCost": 500, "amount": 500 },
-    { "quantity": 1, "description": "Salario Kelvin", "unitCost": 500, "amount": 500 }
+    {
+      "quantity": 1,
+      "description": "Marketing — branding y naming de la marca",
+      "unitCost": 1700,
+      "amount": 1700,
+      "month": "2025-01"
+    },
+    {
+      "quantity": 4,
+      "description": "Marketing — impresión de lonas",
+      "unitCost": 140,
+      "amount": 560,
+      "month": "2025-06"
+    },
+    {
+      "quantity": 1,
+      "description": "Marketing — soporte para lona",
+      "unitCost": 450,
+      "amount": 450,
+      "month": "2025-06"
+    },
+    {
+      "quantity": 1,
+      "description": "Marketing — impresión de tarjetas de presentación",
+      "unitCost": 350,
+      "amount": 350,
+      "month": "2025-06"
+    },
+    {
+      "quantity": 4,
+      "description": "Marketing — X-banners (roll-ups)",
+      "unitCost": 292,
+      "amount": 1168,
+      "month": "2025-06"
+    },
+    {
+      "quantity": 1,
+      "description": "Marketing — video promocional",
+      "unitCost": 570,
+      "amount": 570,
+      "month": "2025-06"
+    },
+    {
+      "quantity": 1,
+      "description": "Infraestructura — worker Celery en Heroku",
+      "unitCost": 38,
+      "amount": 38,
+      "month": "2025-08"
+    },
+    {
+      "quantity": 1,
+      "description": "Patrocinio — concurso de canto Rotaract",
+      "unitCost": 500,
+      "amount": 500,
+      "month": "2026-09"
+    },
+    {
+      "quantity": 1,
+      "description": "Nómina — colaborador Kelvin",
+      "unitCost": 500,
+      "amount": 500,
+      "month": "2026-06"
+    }
   ]
 }
