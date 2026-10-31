@@ -1,6 +1,6 @@
 import React from "react";
 
-export type IconName = "income" | "recurring" | "dev" | "wallet" | "net" | "check" | "alert" | "up" | "down";
+export type IconName = "income" | "recurring" | "dev" | "wallet" | "net" | "check" | "alert" | "up" | "down" | "store" | "clock";
 
 const ICON_PATHS: Record<IconName, string> = {
   income: "M3 17l6-6 4 4 8-8M15 7h6v6",
@@ -10,6 +10,8 @@ const ICON_PATHS: Record<IconName, string> = {
   net: "M12 3v18M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2.2 3 5 3 5 1.3 5 3-2.2 3-5 3-5-1.3-5-3",
   check: "M5 13l4 4L19 7",
   alert: "M12 9v4m0 4h.01M10.3 4.2L2.6 18a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 4.2a2 2 0 00-3.4 0z",
+  store: "M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6",
+  clock: "M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
   up: "M7 17L17 7M9 7h8v8",
   down: "M7 7l10 10M17 9v8H9",
 };
@@ -151,6 +153,19 @@ export function Figure({
   );
 }
 
+/**
+ * Card blanca única que envuelve el contenido de una página (como el
+ * contenedor principal de pos-multi-store). Las secciones internas usan
+ * <Panel bare>.
+ */
+export function PageCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-brand border border-line bg-paper p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-6">
+      {children}
+    </div>
+  );
+}
+
 export function Panel({
   title,
   subtitle,
@@ -171,18 +186,23 @@ export function Panel({
     <section
       className={
         bare
-          ? "border-t border-line"
+          ? "mt-5 border-t border-line pt-5"
           : "mb-5 overflow-hidden rounded-brand border border-line bg-paper shadow-[0_8px_30px_rgba(15,23,42,0.06)]"
       }
     >
-      <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-3">
+      <div
+        className={
+          "flex items-start justify-between gap-4 pb-3 " +
+          (bare ? "" : "px-5 pt-5")
+        }
+      >
         <div>
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
         </div>
         {action}
       </div>
-      <div className={flush ? "" : "px-5 pb-5"}>{children}</div>
+      <div className={flush || bare ? "" : "px-5 pb-5"}>{children}</div>
     </section>
   );
 }

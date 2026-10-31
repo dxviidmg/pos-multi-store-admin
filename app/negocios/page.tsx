@@ -8,7 +8,7 @@ import React, { useMemo, useState } from "react";
 import { useAuth } from "@/app/contexts/auth.context";
 import { ProtectedRoute } from "@/app/components/protected-route";
 import { Navbar } from "@/app/components/navbar";
-import { ErrorAlert, PageHeader, Panel, StatCard } from "@/app/components/ui";
+import { ErrorAlert, PageCard, PageHeader, Panel, StatCard } from "@/app/components/ui";
 import { computeMrr, computePaidThisMonth } from "@/app/utils/earnings";
 
 type SandboxFilter = "all" | "sandbox" | "real";
@@ -30,6 +30,11 @@ function TenantsContent() {
       return true;
     });
   }, [state.tenants, sandboxFilter, domiciliadaFilter]);
+
+  const activeRealCount = useMemo(
+    () => state.tenants.filter((t) => t.has_access && !t.is_sandbox).length,
+    [state.tenants]
+  );
 
   const mrr = useMemo(() => computeMrr(state.tenants), [state.tenants]);
   const paidThisMonth = useMemo(
@@ -71,16 +76,10 @@ function TenantsContent() {
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <PageCard>
         <PageHeader
           title="Negocios"
           subtitle="Negocios registrados y estado de sus pagos."
-          action={
-            ready ? (
-              <span className="rounded-full bg-brand/5 px-3 py-1 text-xs font-semibold tabular-nums text-brand">
-                {filteredTenants.length} de {state.tenants.length}
-              </span>
-            ) : undefined
-          }
         />
 
         {state.accessBlocked && (
@@ -93,7 +92,14 @@ function TenantsContent() {
 
         {/* Resumen de ingresos (mismas tarjetas que /inversion) */}
         {ready && (
-          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <StatCard
+              icon="store"
+              label="Negocios reales activos"
+              value={String(activeRealCount)}
+              tone="brand"
+              hint="Reales (no sandbox) con acceso vigente."
+            />
             <StatCard
               icon="recurring"
               label="MRR (ingreso mensual)"
@@ -106,17 +112,21 @@ function TenantsContent() {
               label="Cobrado este mes"
               value={currency(paidThisMonth.amount)}
               tone="positive"
-              hint={`${paidThisMonth.paidCount} de ${paidThisMonth.totalCount} negocios con pago vigente.`}
+              hint={
+                mrr > 0
+                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR`
+                  : "Sin MRR para comparar"
+              }
             />
           </div>
         )}
 
         {/* Lista de negocios */}
-        <Panel
+        <Panel bare
           title="Listado"
-          action={
-            ready ? (
-              <div className="flex flex-wrap items-end gap-3">
+        >
+          {ready && (
+<div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
                   <label htmlFor="sandbox-filter" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted">
                     Entorno
@@ -127,7 +137,7 @@ function TenantsContent() {
                     onChange={(e) =>
                       setSandboxFilter(e.target.value as SandboxFilter)
                     }
-                    className="min-h-9 cursor-pointer rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                    className="min-h-9 w-full cursor-pointer rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   >
                     <option value="all">Todos</option>
                     <option value="real">Reales</option>
@@ -144,7 +154,7 @@ function TenantsContent() {
                     onChange={(e) =>
                       setDomiciliadaFilter(e.target.value as DomiciliadaFilter)
                     }
-                    className="min-h-9 cursor-pointer rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                    className="min-h-9 w-full cursor-pointer rounded-lg border border-line-strong bg-paper px-3 py-1.5 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   >
                     <option value="all">Todas</option>
                     <option value="yes">Domiciliadas</option>
@@ -152,9 +162,8 @@ function TenantsContent() {
                   </select>
                 </div>
               </div>
-            ) : undefined
-          }
-        >
+          )}
+
           {state.tenantsLoading && (
             <div role="status" aria-live="polite" className="animate-pulse space-y-3 motion-reduce:animate-none">
               <span className="sr-only">Cargando negocios...</span>
@@ -248,7 +257,7 @@ function TenantsContent() {
 
         {/* Owner Info */}
         {state.user?.role === "owner" && (
-          <Panel title="Información del propietario">
+          <Panel bare title="Información del propietario">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <p className="text-sm text-muted">Total de sucursales</p>
@@ -265,6 +274,7 @@ function TenantsContent() {
             </div>
           </Panel>
         )}
+        </PageCard>
       </main>
     </div>
   );
