@@ -181,7 +181,7 @@ function InversionContent() {
               <div
                 role="radiogroup"
                 aria-label="Sueldo mensual para valuar el desarrollo"
-                className="grid w-full grid-cols-2 border-b border-line sm:grid-cols-4"
+                className="grid w-full grid-cols-2 border-b border-line sm:grid-cols-3 lg:grid-cols-6"
               >
                 {SALARY_SCENARIOS.map((s, i) => (
                   <button
@@ -290,6 +290,9 @@ function InversionContent() {
                         Concepto
                       </th>
                       <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
+                        Tipo
+                      </th>
+                      <th scope="col" className="px-5 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-white/80">
                         Detalle
                       </th>
                       <th scope="col" className="px-5 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-white/80">
@@ -303,10 +306,42 @@ function InversionContent() {
                         <td className="px-5 py-3 text-sm font-medium text-foreground">
                           {row.description}
                         </td>
+                        <td className="px-5 py-3">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span
+                              className={
+                                "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold " +
+                                (row.kind === "income"
+                                  ? "bg-green-50 text-green-700"
+                                  : "bg-red-50 text-red-600")
+                              }
+                            >
+                              {row.kind === "income" ? "Entrada" : "Gasto"}
+                            </span>
+                            <span
+                              className={
+                                "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium " +
+                                (row.recurring
+                                  ? "bg-brand/5 text-brand"
+                                  : "bg-line text-muted")
+                              }
+                            >
+                              {row.recurring ? "Recurrente" : "Único"}
+                            </span>
+                          </div>
+                        </td>
                         <td className="px-5 py-3 text-sm text-muted">
                           {row.detail}
                         </td>
-                        <td className="px-5 py-3 text-right text-sm tabular-nums text-foreground">
+                        <td
+                          className={
+                            "px-5 py-3 text-right text-sm tabular-nums " +
+                            (row.kind === "income"
+                              ? "text-green-700"
+                              : "text-foreground")
+                          }
+                        >
+                          {row.kind === "income" ? "+" : "−"}
                           {formatCurrency(row.amount)}
                         </td>
                       </tr>
@@ -314,7 +349,7 @@ function InversionContent() {
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-line-strong bg-row-hover">
-                      <td className="px-5 py-3 text-sm font-semibold text-foreground" colSpan={2}>
+                      <td className="px-5 py-3 text-sm font-semibold text-foreground" colSpan={3}>
                         Total costos
                       </td>
                       <td className="px-5 py-3 text-right text-base font-bold tabular-nums text-foreground">

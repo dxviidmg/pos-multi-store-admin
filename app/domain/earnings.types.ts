@@ -2,11 +2,18 @@
  * Domain types para la sección de ganancias (ingresos vs costos).
  */
 
+/** Si un renglón es una entrada (ingreso) o una salida (gasto). */
+export type EntryKind = "income" | "expense";
+
 /** Un renglón de costo ya calculado, listo para mostrar. */
 export interface CostRow {
   description: string;
   detail?: string;
   amount: number;
+  /** Entrada (ingreso) o gasto. Por defecto, gasto. */
+  kind: EntryKind;
+  /** true si es un cargo/ingreso recurrente; false si es único. */
+  recurring: boolean;
 }
 
 /** Escenario de sueldo mensual para valuar el desarrollo. */

@@ -10,7 +10,7 @@ import {
 } from "@/app/domain/earnings.types";
 import { Tenant } from "@/app/domain/tenant.types";
 
-export const SALARY_SCENARIOS: SalaryScenario[] = [10000, 15000, 25000, 30000].map(
+export const SALARY_SCENARIOS: SalaryScenario[] = [7000, 10000, 15000, 20000, 25000, 30000].map(
   (monthly) => ({ monthly, hourly: monthly / 30 / 8 })
 );
 
@@ -88,18 +88,30 @@ export function computeMonthlyProfit(mrr: number): MonthlyProfit {
 /**
  * Número de cobros efectivos de un cargo recurrente que inicia en "YYYY-MM"
  * y se cobra el día `billingDay` de cada mes. Solo cuenta cobros cuya fecha
- * ya pasó (o es hoy).
+ * ya pasó (o es hoy). Si se pasa `untilYm` ("YYYY-MM"), el conteo se detiene
+ * al final de ese mes (cargo recurrente ya terminado).
  *
  * Ej: inicio "2025-09", billingDay 2, hoy 2026-10-30 ->
  *   cobros el 2025-09-02, 2025-10-02, ..., 2026-10-02 = 14 cobros.
  */
-function billingCountSince(sinceYm: string, billingDay = 1): number {
+function billingCountSince(
+  sinceYm: string,
+  billingDay = 1,
+  untilYm?: string
+): number {
   const [y, m] = sinceYm.split("-").map(Number);
   const now = new Date();
   let count = 0;
-  // Recorrer mes a mes desde el inicio hasta el mes actual.
+  // Recorrer mes a mes desde el inicio hasta el mes actual (o hasta `untilYm`).
   let cursor = new Date(y, m - 1, billingDay);
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let end = today;
+  if (untilYm) {
+    const [uy, um] = untilYm.split("-").map(Number);
+    // Último día del mes de fin, para incluir el cobro de ese mes.
+    const untilEnd = new Date(uy, um, 0);
+    end = untilEnd < today ? untilEnd : today;
+  }
   while (cursor <= end) {
     count++;
     cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, billingDay);
@@ -119,6 +131,22 @@ export function buildEarningsSummary(
 
   const rows: CostRow[] = [];
 
+  // Ingresos manuales (entradas recibidas que no están en la BD).
+  const manualIncome = (costsData as {
+    manualIncome?: { description: string; amount: number; month: string }[];
+  }).manualIncome;
+  if (manualIncome) {
+    for (const m of manualIncome) {
+      rows.push({
+        description: m.description,
+        detail: `Entrada manual · ${m.month}`,
+        amount: m.amount,
+        kind: "income",
+        recurring: false,
+      });
+    }
+  }
+
   // Desarrollo
   rows.push({
     description: costsData.development.description,
@@ -126,31 +154,51 @@ export function buildEarningsSummary(
       scenario.hourly
     )}/h (sueldo ${formatCurrency(scenario.monthly)}/mes)`,
     amount: developmentCost,
+    kind: "expense",
+    recurring: false,
   });
 
   // Costos recurrentes (ej. Render)
   let recurringTotal = 0;
-  for (const r of costsData.recurring) {
-    const charges = billingCountSince(r.since, r.billingDay ?? 1);
+  for (const r of costsData.recurring as {
+    description: string;
+    unitCost: number;
+    since: string;
+    billingDay?: number;
+    until?: string;
+  }[]) {
+    const charges = billingCountSince(r.since, r.billingDay ?? 1, r.until);
     const amount = charges * r.unitCost;
     recurringTotal += amount;
+    const period = r.until
+      ? `${r.since} a ${r.until} (terminado)`
+      : `desde ${r.since}, día ${r.billingDay ?? 1}`;
     rows.push({
       description: r.description,
-      detail: `${charges} cobros × ${formatCurrency(
-        r.unitCost
-      )} (desde ${r.since}, día ${r.billingDay ?? 1})`,
+      detail: `${charges} cobros × ${formatCurrency(r.unitCost)} (${period})`,
       amount,
+      kind: "expense",
+      recurring: true,
     });
   }
 
   // Costos fijos
   let fixedTotal = 0;
-  for (const f of costsData.fixed) {
+  for (const f of costsData.fixed as {
+    quantity: number;
+    description: string;
+    unitCost: number;
+    amount: number;
+    month?: string;
+  }[]) {
     fixedTotal += f.amount;
+    const base = `${f.quantity} × ${formatCurrency(f.unitCost)}`;
     rows.push({
       description: f.description,
-      detail: `${f.quantity} × ${formatCurrency(f.unitCost)}`,
+      detail: f.month ? `${base} · ${f.month}` : base,
       amount: f.amount,
+      kind: "expense",
+      recurring: false,
     });
   }
 
