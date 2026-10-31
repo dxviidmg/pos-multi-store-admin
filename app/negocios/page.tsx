@@ -8,7 +8,8 @@ import React, { useMemo, useState } from "react";
 import { useAuth } from "@/app/contexts/auth.context";
 import { ProtectedRoute } from "@/app/components/protected-route";
 import { Navbar } from "@/app/components/navbar";
-import { ErrorAlert, PageCard, PageHeader, Panel, StatCard } from "@/app/components/ui";
+import { ErrorAlert, PageCard, PageHeader, Panel, PrimaryButton, StatCard } from "@/app/components/ui";
+import { CreateTenantModal } from "@/app/components/create-tenant-modal";
 import { computeMrr, computePaidThisMonth, formatCurrency } from "@/app/utils/earnings";
 
 type SandboxFilter = "all" | "sandbox" | "real";
@@ -16,12 +17,13 @@ type DomiciliadaFilter = "all" | "yes" | "no";
 type StatusFilter = "active" | "cancelled" | "all";
 
 function TenantsContent() {
-  const { state } = useAuth();
+  const { state, refreshTenants } = useAuth();
 
   const [sandboxFilter, setSandboxFilter] = useState<SandboxFilter>("all");
   const [domiciliadaFilter, setDomiciliadaFilter] =
     useState<DomiciliadaFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
+  const [showCreate, setShowCreate] = useState(false);
 
   const filteredTenants = useMemo(() => {
     return state.tenants.filter((tenant) => {
@@ -81,7 +83,22 @@ function TenantsContent() {
         <PageHeader
           title="Negocios"
           subtitle="Negocios registrados y estado de sus pagos."
+          action={
+            state.token ? (
+              <PrimaryButton onClick={() => setShowCreate(true)}>
+                + Nuevo negocio
+              </PrimaryButton>
+            ) : undefined
+          }
         />
+
+        {showCreate && state.token && (
+          <CreateTenantModal
+            token={state.token}
+            onClose={() => setShowCreate(false)}
+            onCreated={refreshTenants}
+          />
+        )}
 
         {state.accessBlocked && (
           <ErrorAlert title="Acceso limitado">
