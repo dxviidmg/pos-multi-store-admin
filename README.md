@@ -87,7 +87,6 @@ Para más detalles, ver [STRUCTURE.md](./STRUCTURE.md).
 
 - [AUTH.md](./AUTH.md) - Documentación detallada de autenticación
 - [STRUCTURE.md](./STRUCTURE.md) - Estructura del proyecto y diagrama de flujos
-- [EXAMPLES.md](./EXAMPLES.md) - Ejemplos de uso y extensión del sistema
 
 ## 🧪 Credenciales de Prueba
 
