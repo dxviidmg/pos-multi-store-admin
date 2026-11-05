@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Panel de administración de SmartVenta.",
     start_url: "/",
     display: "standalone",
-    theme_color: "#0B1B4D",
-    background_color: "#0B1B4D",
+    theme_color: "#171A4A",
+    background_color: "#171A4A",
     icons: [
       { src: "/icon.svg", type: "image/svg+xml", sizes: "any" },
       { src: "/icon-192.png", type: "image/png", sizes: "192x192", purpose: "any" },
