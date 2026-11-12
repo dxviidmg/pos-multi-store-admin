@@ -38,7 +38,14 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Marca + menú (desktop) */}
           <div className="flex items-center gap-8">
-            <span className="text-xl font-extrabold tracking-tight text-white">
+            <span className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icon.svg"
+                alt=""
+                aria-hidden="true"
+                className="h-8 w-8 rounded-lg"
+              />
               SVAdmin
             </span>
             <nav className="hidden items-center gap-1 sm:flex">
