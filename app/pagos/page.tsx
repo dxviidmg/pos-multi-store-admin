@@ -229,6 +229,13 @@ function PagosContent() {
     [breakdowns]
   );
 
+  const totalDiscount = useMemo(
+    () =>
+      Array.from(breakdowns.values()).reduce((s, b) => s + b.discount, 0),
+    [breakdowns]
+  );
+  const totalEstimated = totalUncollected + totalDiscount;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -275,9 +282,9 @@ function PagosContent() {
               <StatCard
                 icon="alert"
                 label="No cobrado (estimado)"
-                value={formatCurrency(totalUncollected)}
-                tone={totalUncollected > 0 ? "negative" : "positive"}
-                hint="Esperado menos recibido, sumado de todos los clientes."
+                value={formatCurrency(totalEstimated)}
+                tone={totalEstimated > 0 ? "negative" : "positive"}
+                hint={`Vencido ${formatCurrency(totalUncollected)} + descuentos ${formatCurrency(totalDiscount)}.`}
               />
             </div>
 
