@@ -15,8 +15,9 @@ import { TenantPaymentHistory } from "@/app/domain/earnings.types";
 import { formatCurrency } from "@/app/utils/earnings";
 
 function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("es-ES", {
+  const d = parseDate(dateStr);
+  if (!d) return "—";
+  return d.toLocaleDateString("es-ES", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -48,7 +49,44 @@ function monthsBetween(
   return Math.max(months, 1);
 }
 
+function addMonths(d: Date, n: number): Date {
+  const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = r.getDate();
+  r.setDate(1);
+  r.setMonth(r.getMonth() + n);
+  const last = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+  r.setDate(Math.min(day, last));
+  return r;
+}
+
+/** Meses (parciales cuentan como uno) transcurridos de `from` a `to`; 0 si to <= from. */
+function overdueMonths(from: Date, to: Date): number {
+  if (to <= from) return 0;
+  let m =
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth());
+  if (addMonths(from, m) > to) m -= 1;
+  return addMonths(from, m) < to ? m + 1 : m;
+}
+
+/** Vigencia = fecha del último pago + los meses que cubrió ese pago. */
+function computeVigencia(h: TenantPaymentHistory): Date | null {
+  let last: { d: Date; months: number } | null = null;
+  for (const p of h.payments) {
+    const d = parseDate(p.date);
+    if (!d) continue;
+    if (!last || d > last.d) {
+      last = { d, months: p.months && p.months > 0 ? p.months : 1 };
+    }
+  }
+  return last ? addMonths(last.d, last.months) : null;
+}
+
 interface ExpectedBreakdown {
+  createdAt: string | null; // created_at del tenant
+  vigencia: Date | null; // fin de cobertura del último pago
+  monthsOverdue: number; // meses vencidos desde la vigencia
+
   rate: number; // tarifa mensual de referencia (máx. de total/meses por pago)
   monthsExpected: number; // meses desde la creación hasta hoy (o cancelación)
   expected: number; // rate * monthsExpected
@@ -82,11 +120,20 @@ function computeExpected(
   const cancelled = tenantIsCancelled || Boolean(tenantCancelledAt);
   const endDate = cancelled ? tenantCancelledAt : null; // null => hoy
   const monthsExpected = monthsBetween(startDate, endDate);
-  const expected = rate * monthsExpected;
   const received = h.total_paid;
-  // Si está cancelado, no se considera nada como no cobrado.
-  const diff = cancelled ? 0 : expected - received;
+  // No cobrado = meses vencidos tras la vigencia del último pago × tarifa.
+  // Si la vigencia cubre hoy, está al corriente. Cancelado: nada pendiente.
+  const vigencia = computeVigencia(h);
+  const refDate = new Date();
+  const monthsOverdue =
+    cancelled || !vigencia ? 0 : overdueMonths(vigencia, refDate);
+  const diff = monthsOverdue * rate;
+  // Esperado = recibido + vencido, para que cuadre con No cobrado.
+  const expected = received + diff;
   return {
+    createdAt: tenantCreatedAt,
+    vigencia,
+    monthsOverdue,
     rate,
     monthsExpected,
     expected,
@@ -247,13 +294,10 @@ function PagosContent() {
                           No cobrado
                         </th>
                         <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
-                          Pagos
+                          Creado
                         </th>
                         <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
-                          Primer pago
-                        </th>
-                        <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
-                          Último pago
+                          Vigencia
                         </th>
                         <th scope="col" className="px-5 py-2.5 text-center text-xs font-semibold text-white/80">
                           Acciones
@@ -281,9 +325,13 @@ function PagosContent() {
                                 {b ? formatCurrency(b.expected) : "—"}
                                 {b && (
                                   <span className="block text-xs text-caption">
-                                    {formatCurrency(b.rate)}/mes × {b.monthsExpected}{" "}
-                                    {b.monthsExpected === 1 ? "mes" : "meses"}
-                                    {b.cancelled && " (hasta cancelación)"}
+                                    {formatCurrency(b.rate)}/mes
+                                    {b.monthsOverdue > 0 &&
+                                      !b.cancelled &&
+                                      ` · ${b.monthsOverdue} ${
+                                        b.monthsOverdue === 1 ? "mes vencido" : "meses vencidos"
+                                      }`}
+                                    {b.cancelled && " (cancelado)"}
                                   </span>
                                 )}
                               </td>
@@ -303,14 +351,24 @@ function PagosContent() {
                                   ? formatCurrency(uncollected)
                                   : "Al día"}
                               </td>
-                              <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
-                                {h.payments_count}
-                              </td>
                               <td className="px-5 py-3 text-sm text-muted">
-                                {formatDate(h.first_payment)}
+                                {formatDate(b?.createdAt ?? null)}
                               </td>
-                              <td className="px-5 py-3 text-sm text-muted">
-                                {formatDate(h.last_payment)}
+                              <td
+                                className={
+                                  "px-5 py-3 text-sm " +
+                                  (b?.vigencia && b.monthsOverdue > 0 && !b.cancelled
+                                    ? "text-red-600"
+                                    : "text-muted")
+                                }
+                              >
+                                {b?.vigencia
+                                  ? b.vigencia.toLocaleDateString("es-ES", {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
+                                  : "—"}
                               </td>
                               <td className="px-5 py-3 text-right text-sm">
                                 <button
@@ -327,7 +385,7 @@ function PagosContent() {
                             </tr>
                             {open && (
                               <tr className="bg-row-hover">
-                                <td colSpan={8} className="px-5 py-3">
+                                <td colSpan={7} className="px-5 py-3">
                                   <ul className="divide-y divide-row-divider rounded-lg border border-line bg-paper">
                                     {h.payments.map((p) => (
                                       <li
