@@ -92,6 +92,7 @@ interface ExpectedBreakdown {
   expected: number; // rate * monthsExpected
   received: number; // suma de pagos
   diff: number; // expected - received (lo no cobrado); <=0 significa al corriente
+  discount: number; // descuento otorgado: suma de (tarifa × meses − monto) por pago
   cancelled: boolean; // si el tenant está cancelado (corta el periodo)
 }
 
@@ -128,6 +129,11 @@ function computeExpected(
   const monthsOverdue =
     cancelled || !vigencia ? 0 : overdueMonths(vigencia, refDate);
   const diff = monthsOverdue * rate;
+  // Descuentos: pagos que cubrieron meses por menos que la tarifa de referencia.
+  const discount = h.payments.reduce((sum, p) => {
+    const months = p.months && p.months > 0 ? p.months : 1;
+    return sum + Math.max(0, rate * months - p.amount);
+  }, 0);
   // Esperado = recibido + vencido, para que cuadre con No cobrado.
   const expected = received + diff;
   return {
@@ -139,6 +145,7 @@ function computeExpected(
     expected,
     received,
     diff,
+    discount,
     cancelled,
   };
 }
@@ -350,6 +357,11 @@ function PagosContent() {
                                   : uncollected > 0
                                   ? formatCurrency(uncollected)
                                   : "Al día"}
+                                {b && b.discount > 0.005 && (
+                                  <span className="block text-xs font-normal text-amber-600">
+                                    Descuento {formatCurrency(b.discount)}
+                                  </span>
+                                )}
                               </td>
                               <td className="px-5 py-3 text-sm text-muted">
                                 {formatDate(b?.createdAt ?? null)}
