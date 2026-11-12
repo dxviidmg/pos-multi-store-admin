@@ -30,17 +30,17 @@ export function LoginForm() {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#171A4A] bg-[radial-gradient(520px_circle_at_85%_8%,rgba(255,176,32,0.22),transparent_60%),radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:auto,22px_22px] md:flex-row md:bg-paper md:bg-none">
+    <div className="fixed inset-0 flex flex-col bg-[#171A4A] md:flex-row md:bg-paper">
       {/* Panel de marca (solo escritorio) */}
       <div className="hidden flex-1 flex-col items-center justify-center bg-[#171A4A] px-12 text-center md:flex">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logo-white.svg"
-          alt="SmartVenta"
+          src="/logo-svadmin-white.svg"
+          alt="SVAdmin"
           className="mb-8 h-auto w-full max-w-[312px]"
         />
         <h2 className="mb-3 text-3xl font-bold tracking-tight text-white">
-          Administración multi-negocio
+          Administrador de clientes
         </h2>
         <p className="mx-auto max-w-sm leading-relaxed text-white/80">
           Gestiona negocios, planes y pagos de todos tus clientes desde un solo
@@ -53,9 +53,9 @@ export function LoginForm() {
         <div className="w-full max-w-[360px] md:max-w-[420px] md:rounded-xl md:border md:border-line md:bg-paper md:p-8 md:shadow-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo-white.svg"
-            alt="SmartVenta"
-            className="mx-auto mb-8 h-auto w-36 md:hidden"
+            src="/logo-svadmin-white.svg"
+            alt="SVAdmin"
+            className="mx-auto mb-8 h-auto w-44 md:hidden"
           />
           <h1 className="mb-1 text-center text-2xl font-bold text-white md:text-left md:text-3xl md:text-foreground">
             Bienvenido
