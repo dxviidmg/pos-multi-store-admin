@@ -90,8 +90,29 @@ export interface MonthlyProfit {
 
 type BillableTenant = Pick<
   Tenant,
-  "has_access" | "is_sandbox" | "is_paid" | "is_cancelled" | "monthly_amount"
+  | "has_access"
+  | "is_sandbox"
+  | "is_paid"
+  | "is_cancelled"
+  | "monthly_amount"
+  | "next_payment_date"
 >;
+
+/**
+ * Al corriente: el backend lo marca pagado Y el próximo pago no ya venció.
+ * `is_paid` puede quedar desfasado; si `next_payment_date` ya pasó (antes de
+ * hoy), el negocio debe un pago.
+ */
+export function isUpToDate(
+  t: Pick<Tenant, "is_paid" | "next_payment_date">,
+  now: Date = new Date()
+): boolean {
+  if (!t.is_paid) return false;
+  if (!t.next_payment_date) return true;
+  const due = new Date(t.next_payment_date);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return due >= startOfToday;
+}
 
 /**
  * Negocio que cuenta para el potencial de facturación: real (no sandbox) y
@@ -130,7 +151,7 @@ export function computePaidThisMonth(tenants: BillableTenant[]): {
   totalCount: number;
 } {
   const active = tenants.filter(isActiveReal);
-  const paid = active.filter((t) => t.is_paid);
+  const paid = active.filter((t) => isUpToDate(t));
   return {
     amount: paid.reduce((sum, t) => sum + t.monthly_amount, 0),
     paidCount: paid.length,

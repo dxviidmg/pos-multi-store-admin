@@ -11,7 +11,7 @@ import { Navbar } from "@/app/components/navbar";
 import { ErrorAlert, PageCard, PageHeader, Panel, PrimaryButton, StatCard } from "@/app/components/ui";
 import { CreateTenantModal } from "@/app/components/create-tenant-modal";
 import { CreatePaymentModal } from "@/app/components/create-payment-modal";
-import { computeMrr, computePaidThisMonth, formatCurrency } from "@/app/utils/earnings";
+import { computeMrr, computePaidThisMonth, formatCurrency, isUpToDate } from "@/app/utils/earnings";
 import { Tenant } from "@/app/domain/tenant.types";
 
 type SandboxFilter = "all" | "sandbox" | "real";
@@ -286,14 +286,14 @@ function TenantsContent() {
                       <td
                         className={
                           "px-5 py-3 text-sm text-right font-semibold tabular-nums " +
-                          (tenant.is_paid ? "text-foreground" : "text-red-600")
+                          (isUpToDate(tenant) ? "text-foreground" : "text-red-600")
                         }
                         title={
-                          tenant.is_paid ? "Pagado / vigente" : "Sin pago vigente"
+                          isUpToDate(tenant) ? "Pagado / vigente" : "Sin pago vigente"
                         }
                       >
                         {formatCurrency(tenant.monthly_amount)}
-                        {!tenant.is_paid && (
+                        {!isUpToDate(tenant) && (
                           <span className="block text-xs font-normal">
                             Sin pagar
                           </span>
