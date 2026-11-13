@@ -122,7 +122,7 @@ function TenantsContent() {
 
         {/* Resumen de ingresos (mismas tarjetas que /inversion) */}
         {ready && (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <StatCard
               icon="store"
               label="Negocios reales activos"
@@ -132,19 +132,12 @@ function TenantsContent() {
             />
             <StatCard
               icon="recurring"
-              label="MRR (ingreso mensual)"
-              value={formatCurrency(mrr)}
-              tone="positive"
-              hint="MRR potencial: mensualidades de los negocios reales no cancelados, si todos pagan."
-            />
-            <StatCard
-              icon="income"
               label="MRR pagado"
-              value={formatCurrency(paidThisMonth.amount)}
+              value={`${formatCurrency(paidThisMonth.amount)} de ${formatCurrency(mrr)}`}
               tone="positive"
               hint={
                 mrr > 0
-                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR · ${paidThisMonth.paidCount}/${paidThisMonth.totalCount} al corriente`
+                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR mensual · ${paidThisMonth.paidCount}/${paidThisMonth.totalCount} al corriente`
                   : "Sin MRR para comparar"
               }
             />
@@ -286,7 +279,7 @@ function TenantsContent() {
                       <td
                         className={
                           "px-5 py-3 text-sm text-right font-semibold tabular-nums " +
-                          (isUpToDate(tenant) ? "text-foreground" : "text-red-600")
+                          (isUpToDate(tenant) ? "text-foreground" : "text-amber-700")
                         }
                         title={
                           isUpToDate(tenant) ? "Pagado / vigente" : "Sin pago vigente"
@@ -295,7 +288,7 @@ function TenantsContent() {
                         {formatCurrency(tenant.monthly_amount)}
                         {!isUpToDate(tenant) && (
                           <span className="block text-xs font-normal">
-                            Sin pagar
+                            Con pago pendiente
                           </span>
                         )}
                       </td>
