@@ -137,7 +137,7 @@ function TenantsContent() {
               tone="positive"
               hint={
                 mrr > 0
-                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR mensual · ${paidThisMonth.paidCount}/${paidThisMonth.totalCount} al corriente`
+                  ? `${Math.round((paidThisMonth.amount / mrr) * 100)}% del MRR · ${paidThisMonth.paidCount}/${paidThisMonth.totalCount} al corriente`
                   : "Sin MRR para comparar"
               }
             />
